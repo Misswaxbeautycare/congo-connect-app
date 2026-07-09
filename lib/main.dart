@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_page.dart';
 
 const supabaseUrl = 'https://kiyruyneaaiwveblaucf.supabase.co';
-const supabaseAnonKey = 'COLLE_ICI_TA_CLE_ANON_PUBLIC';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpeXJ1eW5lYWFpd3ZlYmxhdWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjAxMDgsImV4cCI6MjA5ODU5NjEwOH0.3n4JWy4Q5whtjx1nr9mDnzJ6eFtr6_8TiMSMFgYBP3o';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
