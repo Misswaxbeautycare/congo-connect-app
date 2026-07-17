@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_page.dart';
+import 'screens/login_page.dart';
 
 const supabaseUrl = 'https://kiyruyneaaiwveblaucf.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpeXJ1eW5lYWFpd3ZlYmxhdWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjAxMDgsImV4cCI6MjA5ODU5NjEwOH0.3n4JWy4Q5whtjx1nr9mDnzJ6eFtr6_8TiMSMFgYBP3o';
@@ -44,7 +45,25 @@ class CongoConnectApp extends StatelessWidget {
           centerTitle: false,
         ),
       ),
-      home: const HomePage(),
+      home: const AuthGate(),
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<AuthState>(
+      stream: supabase.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session = supabase.auth.currentSession;
+        if (session != null) {
+          return const HomePage();
+        }
+        return const LoginPage();
+      },
     );
   }
 }
