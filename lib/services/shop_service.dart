@@ -27,4 +27,30 @@ class ShopService {
         .map((item) => Shop.fromMap(item as Map<String, dynamic>))
         .toList();
   }
+
+  static Future<void> createShop({
+    required String name,
+    required String category,
+    String? subcategory,
+    String? bio,
+    String? phone,
+    String? email,
+    String? address,
+    bool acceptsAppointments = false,
+  }) async {
+    final userId = supabase.auth.currentUser!.id;
+    await supabase.from('shops').insert({
+      'owner_id': userId,
+      'name': name,
+      'category': category,
+      'subcategory': subcategory,
+      'bio': bio,
+      'phone': phone,
+      'email': email,
+      'address': address,
+      'accepts_appointments': acceptsAppointments,
+      'status': 'pending',
+      'verification_status': 'pending',
+    });
+  }
 }
