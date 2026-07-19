@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
+import 'create_shop_page.dart';
+import 'login_page.dart';
 import '../models/shop.dart';
 import '../services/shop_service.dart';
 import '../widgets/category_grid.dart';
@@ -29,6 +32,21 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add_business_outlined),
+            tooltip: 'Créer ma boutique',
+            onPressed: () {
+              if (supabase.auth.currentUser != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CreateShopPage()),
+                );
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {},
