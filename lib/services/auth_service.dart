@@ -27,6 +27,10 @@ class AuthService {
     await _client.auth.signOut();
   }
 
+  static Future<void> resetPassword(String email) async {
+    await _client.auth.resetPasswordForEmail(email);
+  }
+
   static User? get currentUser => _client.auth.currentUser;
 
   static Stream<AuthState> get authStateChanges =>
