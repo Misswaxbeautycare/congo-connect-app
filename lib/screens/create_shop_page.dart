@@ -16,20 +16,32 @@ class _CreateShopPageState extends State<CreateShopPage> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
 
-  String _category = 'Santé';
+  String _category = 'sante';
   bool _acceptsAppointments = false;
   bool _isLoading = false;
   String? _errorMessage;
 
-  final List<String> _categories = [
-    'Santé',
-    'Beauté',
-    'Restaurants',
-    'Hébergement',
-    'Transport',
-    'Immobilier',
-    'Artisans',
-  ];
+  final Map<String, String> _categories = {
+    'sante': 'Santé',
+    'beaute': 'Beauté',
+    'mode_couture': 'Mode & Couture',
+    'restaurants_alimentation': 'Restaurants & Alimentation',
+    'transport': 'Transport',
+    'immobilier': 'Immobilier',
+    'electronique_reparation': 'Électronique & Réparation',
+    'energie': 'Énergie',
+    'eau': 'Eau',
+    'agriculture_elevage': 'Agriculture & Élevage',
+    'mines_negoce': 'Mines & Négoce minier',
+    'artisanat': 'Artisanat',
+    'finance_mobile_money': 'Finance & Mobile Money',
+    'education': 'Éducation',
+    'securite': 'Sécurité',
+    'evenementiel': 'Événementiel',
+    'recrutement_emploi': 'Recrutement & Emploi',
+    'equipement_quincaillerie': 'Équipement & Quincaillerie',
+    'grossiste_fournisseur': 'Grossiste / Fournisseur',
+  };
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -83,8 +95,11 @@ class _CreateShopPageState extends State<CreateShopPage> {
               DropdownButtonFormField<String>(
                 initialValue: _category,
                 decoration: const InputDecoration(labelText: 'Catégorie'),
-                items: _categories
-                    .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                items: _categories.entries
+                    .map((entry) => DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ))
                     .toList(),
                 onChanged: (value) => setState(() => _category = value!),
               ),
