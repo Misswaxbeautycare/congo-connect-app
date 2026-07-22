@@ -3,18 +3,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService {
   static final SupabaseClient _client = Supabase.instance.client;
 
-  static Future<void> sendOtp(String email) async {
-    await _client.auth.signInWithOtp(email: email);
+  static Future<AuthResponse> signUp({
+    required String email,
+    required String password,
+  }) async {
+    return await _client.auth.signUp(
+      email: email,
+      password: password,
+    );
   }
 
-  static Future<AuthResponse> verifyOtp({
+  static Future<AuthResponse> signIn({
     required String email,
-    required String token,
+    required String password,
   }) async {
-    return await _client.auth.verifyOTP(
-      type: OtpType.email,
+    return await _client.auth.signInWithPassword(
       email: email,
-      token: token,
+      password: password,
     );
   }
 
