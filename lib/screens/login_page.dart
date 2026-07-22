@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'signup_page.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,45 +12,76 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
-  final _codeController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _codeSent = false;
+  bool _obscurePassword = true;
   String? _errorMessage;
 
-  Future<void> _sendCode() async {
+  Future<void> _login() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
-      await AuthService.sendOtp(_emailController.text.trim());
-      setState(() => _codeSent = true);
-    } catch (e) {
-      setState(() => _errorMessage = "Impossible d'envoyer le code. Vérifie l'email.");
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _verifyCode() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    try {
-      await AuthService.verifyOtp(
+      await AuthService.signIn(
         email: _emailController.text.trim(),
-        token: _codeController.text.trim(),
+        password: _passwordController.text.trim(),
       );
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } catch (e) {
-      setState(() => _errorMessage = "Code incorrect ou expiré.");
+      setState(() {
+        _errorMessage = "Connexion échouée. Vérifie ton email et mot de passe.";
+      });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final resetEmailController = TextEditingController(text: _emailController.text);
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Mot de passe oublié'),
+          content: TextField(
+            controller: resetEmailController,
+            decoration: const InputDecoration(labelText: 'Ton email'),
+            keyboardType: TextInputType.emailAddress,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final email = resetEmailController.text.trim();
+                if (email.isEmpty) return;
+                try {
+                  await AuthService.resetPassword(email);
+                  if (!mounted) return;
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Email de réinitialisation envoyé.')),
+                  );
+                } catch (e) {
+                  if (!mounted) return;
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Une erreur est survenue.')),
+                  );
+                }
+              },
+              child: const Text('Envoyer'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -63,19 +95,29 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
-              enabled: !_codeSent,
               decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
             ),
-            if (_codeSent) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: _codeController,
-                decoration: const InputDecoration(labelText: 'Code reçu par email'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
             const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Mot de passe',
+                suffixIcon: IconButton(
+                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: _showForgotPasswordDialog,
+                child: const Text('Mot de passe oublié ?'),
+              ),
+            ),
+            const SizedBox(height: 8),
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -84,9 +126,17 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: _codeSent ? _verifyCode : _sendCode,
-                    child: Text(_codeSent ? 'Valider le code' : 'Recevoir un code'),
+                    onPressed: _login,
+                    child: const Text('Se connecter'),
                   ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SignupPage()),
+                );
+              },
+              child: const Text("Pas encore de compte ? S'inscrire"),
+            ),
           ],
         ),
       ),
