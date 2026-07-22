@@ -32,7 +32,7 @@ class _SignupPageState extends State<SignupPage> {
       );
     } catch (e) {
       setState(() {
-        _errorMessage = "Inscription échouée. Vérifie ton email et mot de passe (6 caractères minimum).";
+        _errorMessage = "Erreur : $e";
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
