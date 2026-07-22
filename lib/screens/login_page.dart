@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     } catch (e) {
       setState(() {
-        _errorMessage = "Connexion échouée. Vérifie ton email et mot de passe.";
+        _errorMessage = "Erreur : $e";
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
