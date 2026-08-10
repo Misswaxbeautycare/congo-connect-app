@@ -37,6 +37,9 @@ class ShopService {
     String? email,
     String? address,
     bool acceptsAppointments = false,
+    String? coverUrl,
+    int? stockQuantity,
+    String? paymentMethod,
   }) async {
     final userId = supabase.auth.currentUser!.id;
     await supabase.from('shops').insert({
@@ -49,6 +52,9 @@ class ShopService {
       'email': email,
       'address': address,
       'accepts_appointments': acceptsAppointments,
+      'cover_url': coverUrl,
+      'stock_quantity': stockQuantity,
+      'payment_method': paymentMethod,
       'status': 'pending',
       'verification_status': 'pending',
     });

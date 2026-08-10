@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/community_listing.dart';
 import '../services/community_listing_service.dart';
@@ -98,7 +99,6 @@ class _ListingsPageState extends State<ListingsPage> {
               itemBuilder: (context, index) {
                 final item = items[index];
                 return Container(
-                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
@@ -111,43 +111,74 @@ class _ListingsPageState extends State<ListingsPage> {
                       ),
                     ],
                   ),
+                  clipBehavior: Clip.antiAlias,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      if (item.description != null && item.description!.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text(item.description!, style: const TextStyle(fontSize: 13, color: Colors.black87)),
-                      ],
-                      const SizedBox(height: 10),
-                      if (item.pickupLocation != null && item.pickupLocation!.isNotEmpty)
-                        Row(
+                      // Toutes les photos gardent la même taille/format pour un rendu uniforme
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: item.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => _imagePlaceholder(),
+                              )
+                            : _imagePlaceholder(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.location_on_outlined, size: 16, color: Colors.black54),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                item.pickupLocation!,
-                                style: const TextStyle(fontSize: 12.5, color: Colors.black54),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                ),
+                                if (item.price != null)
+                                  Text(
+                                    '${item.price!.toStringAsFixed(0)} FC',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFF39C12)),
+                                  ),
+                              ],
+                            ),
+                            if (item.description != null && item.description!.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(item.description!, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                            ],
+                            const SizedBox(height: 10),
+                            if (item.pickupLocation != null && item.pickupLocation!.isNotEmpty)
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on_outlined, size: 16, color: Colors.black54),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      item.pickupLocation!,
+                                      style: const TextStyle(fontSize: 12.5, color: Colors.black54),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.person_outline, size: 16, color: Colors.black45),
+                                const SizedBox(width: 4),
+                                Text(item.contactName, style: const TextStyle(fontSize: 12.5, color: Colors.black45)),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _call(item.contactPhone),
+                                icon: const Icon(Icons.call_outlined, size: 18),
+                                label: const Text('Contacter'),
                               ),
                             ),
                           ],
-                        ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.person_outline, size: 16, color: Colors.black45),
-                          const SizedBox(width: 4),
-                          Text(item.contactName, style: const TextStyle(fontSize: 12.5, color: Colors.black45)),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () => _call(item.contactPhone),
-                          icon: const Icon(Icons.call_outlined, size: 18),
-                          label: const Text('Contacter'),
                         ),
                       ),
                     ],
@@ -157,6 +188,18 @@ class _ListingsPageState extends State<ListingsPage> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      color: (_isDon ? Colors.green : Colors.orange).withOpacity(0.08),
+      alignment: Alignment.center,
+      child: Icon(
+        _isDon ? Icons.volunteer_activism_outlined : Icons.swap_horiz,
+        color: _isDon ? Colors.green : Colors.orange,
+        size: 32,
       ),
     );
   }

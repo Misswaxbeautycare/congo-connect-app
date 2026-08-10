@@ -9,6 +9,16 @@ class ShopProfilePage extends StatelessWidget {
 
   const ShopProfilePage({super.key, required this.shop});
 
+  String _paymentLabel(String key) {
+    const labels = {
+      'especes': 'Espèces',
+      'mobile_money': 'Mobile Money',
+      'virement': 'Virement bancaire',
+      'especes_mobile_money': 'Espèces & Mobile Money',
+    };
+    return labels[key] ?? key;
+  }
+
   Future<void> _launch(BuildContext context, Uri uri) async {
     final ok = await canLaunchUrl(uri);
     if (ok) {
@@ -115,6 +125,10 @@ class ShopProfilePage extends StatelessWidget {
                       _InfoRow(icon: Icons.phone_outlined, text: shop.phone!),
                     if (shop.email != null && shop.email!.isNotEmpty)
                       _InfoRow(icon: Icons.email_outlined, text: shop.email!),
+                    if (shop.stockQuantity != null)
+                      _InfoRow(icon: Icons.inventory_2_outlined, text: 'Stock disponible : ${shop.stockQuantity}'),
+                    if (shop.paymentMethod != null && shop.paymentMethod!.isNotEmpty)
+                      _InfoRow(icon: Icons.payments_outlined, text: 'Paiement : ${_paymentLabel(shop.paymentMethod!)}'),
                     const SizedBox(height: 24),
                     if (shop.phone != null && shop.phone!.isNotEmpty)
                       SizedBox(

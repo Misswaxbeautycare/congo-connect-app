@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../services/shop_service.dart';
+import '../widgets/photo_picker_field.dart';
 
 class CreateShopPage extends StatefulWidget {
   final String? initialCategory;
@@ -18,9 +19,12 @@ class _CreateShopPageState extends State<CreateShopPage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
+  final _stockController = TextEditingController();
 
+  String? _coverUrl;
   late String _category;
   String? _subcategory;
+  String _paymentMethod = 'especes';
   bool _acceptsAppointments = false;
   bool _isLoading = false;
   String? _errorMessage;
@@ -29,10 +33,28 @@ class _CreateShopPageState extends State<CreateShopPage> {
     for (final m in appModules) m.key: m.label,
   };
 
+  final Map<String, String> _paymentMethods = const {
+    'especes': 'Espèces',
+    'mobile_money': 'Mobile Money',
+    'virement': 'Virement bancaire',
+    'especes_mobile_money': 'Espèces & Mobile Money',
+  };
+
   @override
   void initState() {
     super.initState();
     _category = widget.initialCategory ?? appModules.first.key;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _bioController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _stockController.dispose();
+    super.dispose();
   }
 
   List<String> get _subcategoryOptions => moduleSubcategories[_category] ?? const [];
@@ -55,6 +77,9 @@ class _CreateShopPageState extends State<CreateShopPage> {
         email: _emailController.text.trim(),
         address: _addressController.text.trim(),
         acceptsAppointments: _acceptsAppointments,
+        coverUrl: _coverUrl,
+        stockQuantity: int.tryParse(_stockController.text.trim()),
+        paymentMethod: _paymentMethod,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,6 +105,12 @@ class _CreateShopPageState extends State<CreateShopPage> {
           key: _formKey,
           child: ListView(
             children: [
+              PhotoPickerField(
+                folder: 'shops',
+                label: 'Photo de couverture de la boutique',
+                onImageUploaded: (url) => setState(() => _coverUrl = url),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nom de la boutique'),
@@ -134,6 +165,24 @@ class _CreateShopPageState extends State<CreateShopPage> {
               TextFormField(
                 controller: _addressController,
                 decoration: const InputDecoration(labelText: 'Adresse'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _stockController,
+                decoration: const InputDecoration(
+                  labelText: 'Stock / quantité disponible (optionnel)',
+                  hintText: 'Ex : 25',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _paymentMethod,
+                decoration: const InputDecoration(labelText: 'Moyen de paiement accepté'),
+                items: _paymentMethods.entries
+                    .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+                    .toList(),
+                onChanged: (value) => setState(() => _paymentMethod = value!),
               ),
               const SizedBox(height: 8),
               SwitchListTile(

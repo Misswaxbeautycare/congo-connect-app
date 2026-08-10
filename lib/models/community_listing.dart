@@ -4,6 +4,7 @@ class CommunityListing {
   final String title;
   final String? description;
   final String? imageUrl;
+  final double? price;
   final String contactName;
   final String contactPhone;
   final String? pickupLocation;
@@ -16,6 +17,7 @@ class CommunityListing {
     required this.title,
     this.description,
     this.imageUrl,
+    this.price,
     required this.contactName,
     required this.contactPhone,
     this.pickupLocation,
@@ -30,6 +32,7 @@ class CommunityListing {
       title: map['title'] as String? ?? '',
       description: map['description'] as String?,
       imageUrl: map['image_url'] as String?,
+      price: (map['price'] as num?)?.toDouble(),
       contactName: map['contact_name'] as String? ?? '',
       contactPhone: map['contact_phone'] as String? ?? '',
       pickupLocation: map['pickup_location'] as String?,

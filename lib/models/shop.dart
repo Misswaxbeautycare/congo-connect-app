@@ -16,6 +16,8 @@ class Shop {
   final bool isPremium;
   final bool featured;
   final String verificationStatus;
+  final int? stockQuantity;
+  final String? paymentMethod;
   final double ratingAvg;
   final int ratingCount;
 
@@ -37,6 +39,8 @@ class Shop {
     this.isPremium = false,
     this.featured = false,
     this.verificationStatus = 'pending',
+    this.stockQuantity,
+    this.paymentMethod,
     this.ratingAvg = 0,
     this.ratingCount = 0,
   });
@@ -60,6 +64,8 @@ class Shop {
       isPremium: map['is_premium'] as bool? ?? false,
       featured: map['featured'] as bool? ?? false,
       verificationStatus: map['verification_status'] as String? ?? 'pending',
+      stockQuantity: (map['stock_quantity'] as num?)?.toInt(),
+      paymentMethod: map['payment_method'] as String?,
       ratingAvg: (map['rating_avg'] as num?)?.toDouble() ?? 0,
       ratingCount: (map['rating_count'] as num?)?.toInt() ?? 0,
     );

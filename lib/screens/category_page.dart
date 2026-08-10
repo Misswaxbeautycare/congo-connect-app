@@ -159,7 +159,7 @@ class _CategoryShopCard extends StatelessWidget {
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: AspectRatio(
-                aspectRatio: 1.4,
+                aspectRatio: 16 / 9,
                 child: shop.coverUrl != null && shop.coverUrl!.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: shop.coverUrl!,

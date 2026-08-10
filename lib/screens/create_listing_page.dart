@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/community_listing_service.dart';
+import '../widgets/photo_picker_field.dart';
 
 class CreateListingPage extends StatefulWidget {
   final String type; // 'don' ou 'troc'
@@ -14,10 +15,12 @@ class _CreateListingPageState extends State<CreateListingPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _priceController = TextEditingController();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _locationController = TextEditingController();
 
+  String? _imageUrl;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -27,6 +30,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _priceController.dispose();
     _nameController.dispose();
     _phoneController.dispose();
     _locationController.dispose();
@@ -46,6 +50,8 @@ class _CreateListingPageState extends State<CreateListingPage> {
         type: widget.type,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
+        imageUrl: _imageUrl,
+        price: _isDon ? null : double.tryParse(_priceController.text.trim()),
         contactName: _nameController.text.trim(),
         contactPhone: _phoneController.text.trim(),
         pickupLocation: _locationController.text.trim(),
@@ -98,6 +104,12 @@ class _CreateListingPageState extends State<CreateListingPage> {
                 ),
               ),
               const SizedBox(height: 20),
+              PhotoPickerField(
+                folder: widget.type,
+                label: 'Ajouter une photo de l\'objet',
+                onImageUploaded: (url) => setState(() => _imageUrl = url),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
@@ -111,6 +123,17 @@ class _CreateListingPageState extends State<CreateListingPage> {
                 decoration: const InputDecoration(labelText: 'Description (état, détails...)'),
                 maxLines: 3,
               ),
+              if (!_isDon) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _priceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Prix souhaité (optionnel, laisser vide si troc pur)',
+                    hintText: 'Ex : 20000',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
