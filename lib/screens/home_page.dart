@@ -10,6 +10,8 @@ import '../services/shop_service.dart';
 import '../widgets/category_grid.dart';
 import '../widgets/shop_card.dart';
 import '../widgets/pulsing_quick_action.dart';
+import '../widgets/ad_banner.dart';
+import 'ad_request_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -52,6 +54,15 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
+            icon: const Icon(Icons.campaign_outlined),
+            tooltip: 'Demander une publicité',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AdRequestPage()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {},
           ),
@@ -81,6 +92,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+            const AdBanner(),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
