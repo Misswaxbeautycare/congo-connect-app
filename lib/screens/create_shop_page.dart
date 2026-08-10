@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../models/category.dart';
 import '../services/shop_service.dart';
 
 class CreateShopPage extends StatefulWidget {
-  const CreateShopPage({super.key});
+  final String? initialCategory;
+
+  const CreateShopPage({super.key, this.initialCategory});
 
   @override
   State<CreateShopPage> createState() => _CreateShopPageState();
@@ -16,32 +19,23 @@ class _CreateShopPageState extends State<CreateShopPage> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
 
-  String _category = 'sante';
+  late String _category;
+  String? _subcategory;
   bool _acceptsAppointments = false;
   bool _isLoading = false;
   String? _errorMessage;
 
   final Map<String, String> _categories = {
-    'sante': 'Santé',
-    'beaute': 'Beauté',
-    'mode_couture': 'Mode & Couture',
-    'restaurants_alimentation': 'Restaurants & Alimentation',
-    'transport': 'Transport',
-    'immobilier': 'Immobilier',
-    'electronique_reparation': 'Électronique & Réparation',
-    'energie': 'Énergie',
-    'eau': 'Eau',
-    'agriculture_elevage': 'Agriculture & Élevage',
-    'mines_negoce': 'Mines & Négoce minier',
-    'artisanat': 'Artisanat',
-    'finance_mobile_money': 'Finance & Mobile Money',
-    'education': 'Éducation',
-    'securite': 'Sécurité',
-    'evenementiel': 'Événementiel',
-    'recrutement_emploi': 'Recrutement & Emploi',
-    'equipement_quincaillerie': 'Équipement & Quincaillerie',
-    'grossiste_fournisseur': 'Grossiste / Fournisseur',
+    for (final m in appModules) m.key: m.label,
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _category = widget.initialCategory ?? appModules.first.key;
+  }
+
+  List<String> get _subcategoryOptions => moduleSubcategories[_category] ?? const [];
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -55,6 +49,7 @@ class _CreateShopPageState extends State<CreateShopPage> {
       await ShopService.createShop(
         name: _nameController.text.trim(),
         category: _category,
+        subcategory: _subcategory,
         bio: _bioController.text.trim(),
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),
@@ -101,8 +96,22 @@ class _CreateShopPageState extends State<CreateShopPage> {
                           child: Text(entry.value),
                         ))
                     .toList(),
-                onChanged: (value) => setState(() => _category = value!),
+                onChanged: (value) => setState(() {
+                  _category = value!;
+                  _subcategory = null;
+                }),
               ),
+              if (_subcategoryOptions.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _subcategory,
+                  decoration: const InputDecoration(labelText: 'Sous-catégorie (optionnel)'),
+                  items: _subcategoryOptions
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
+                  onChanged: (value) => setState(() => _subcategory = value),
+                ),
+              ],
               const SizedBox(height: 16),
               TextFormField(
                 controller: _bioController,

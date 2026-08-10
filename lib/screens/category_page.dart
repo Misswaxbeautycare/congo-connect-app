@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../main.dart';
 import '../models/category.dart';
 import '../models/shop.dart';
 import '../services/shop_service.dart';
 import 'shop_profile_page.dart';
+import 'create_shop_page.dart';
+import 'login_page.dart';
 
 class CategoryPage extends StatefulWidget {
   final String moduleKey;
@@ -61,7 +64,7 @@ class _CategoryPageState extends State<CategoryPage> {
             if (shops.isEmpty) {
               return ListView(
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                   Icon(Icons.storefront_outlined, size: 56, color: Colors.grey.shade400),
                   const SizedBox(height: 12),
                   Text(
@@ -74,6 +77,26 @@ class _CategoryPageState extends State<CategoryPage> {
                     'Sois le premier à ajouter ta boutique !',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.black38, fontSize: 12),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        if (supabase.auth.currentUser != null) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => CreateShopPage(initialCategory: widget.moduleKey),
+                            ),
+                          );
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const LoginPage()),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.add_business_outlined),
+                      label: const Text('Créer ma boutique ici'),
+                    ),
                   ),
                 ],
               );

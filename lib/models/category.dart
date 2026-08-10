@@ -45,3 +45,27 @@ const List<AppModule> appModules = [
   AppModule(key: 'equipement_quincaillerie', label: 'Équipement & Quincaillerie', emoji: '🧰'),
   AppModule(key: 'grossiste_fournisseur', label: 'Grossiste / Fournisseur', emoji: '📦'),
 ];
+
+/// Sous-catégories proposées pour chaque module, utilisées dans le
+/// formulaire de création de boutique pour affiner la classification.
+const Map<String, List<String>> moduleSubcategories = {
+  'sante': ['Médecin généraliste', 'Dentiste', 'Pharmacie', 'Clinique', 'Laboratoire d\'analyses', 'Matériel médical', 'Sage-femme', 'Kinésithérapeute', 'Opticien'],
+  'beaute': ['Salon de coiffure', 'Institut de beauté', 'Onglerie', 'Barbier', 'Maquilleuse', 'Spa & Massage', 'Produits cosmétiques'],
+  'mode_couture': ['Couturier / Tailleur', 'Boutique de vêtements', 'Chaussures', 'Bijoux & Accessoires', 'Tissus (Wax, etc.)', 'Sacs & Maroquinerie'],
+  'restaurants_alimentation': ['Restaurant', 'Fast-food', 'Traiteur', 'Boulangerie / Pâtisserie', 'Épicerie', 'Boisson & Bar', 'Livraison de repas'],
+  'transport': ['Taxi / VTC', 'Bus / Minibus', 'Location de véhicule', 'Moto-taxi', 'Transport de marchandises', 'Déménagement'],
+  'immobilier': ['Vente de maison/terrain', 'Location', 'Agence immobilière', 'Construction & BTP', 'Architecte'],
+  'electronique_reparation': ['Vente de téléphones', 'Réparation téléphone', 'Ordinateurs', 'Électroménager', 'Accessoires électroniques'],
+  'energie': ['Panneaux solaires', 'Groupe électrogène', 'Installation électrique', 'Vente de gaz'],
+  'eau': ['Vente d\'eau', 'Forage & Puits', 'Traitement d\'eau', 'Livraison d\'eau'],
+  'agriculture_elevage': ['Vente de produits agricoles', 'Élevage', 'Semences & Intrants', 'Matériel agricole', 'Vétérinaire'],
+  'mines_negoce': ['Négoce minier', 'Équipement minier', 'Transport minier', 'Consultance minière'],
+  'artisanat': ['Menuiserie', 'Sculpture', 'Poterie', 'Décoration', 'Maroquinerie artisanale'],
+  'finance_mobile_money': ['Agence Mobile Money', 'Micro-finance', 'Change de devises', 'Transfert d\'argent', 'Assurance'],
+  'education': ['École primaire/secondaire', 'Université / Institut', 'Cours particuliers', 'Formation professionnelle', 'Librairie scolaire', 'Garderie / Crèche'],
+  'securite': ['Agence de gardiennage', 'Vidéosurveillance', 'Alarme & Sécurité', 'Serrurerie'],
+  'evenementiel': ['Organisation de mariage', 'Location de salle', 'Traiteur événementiel', 'DJ / Sonorisation', 'Photographe / Vidéaste', 'Décoration événementielle'],
+  'recrutement_emploi': ['Agence de recrutement', 'Offres d\'emploi', 'Formation professionnelle', 'Freelance / Services'],
+  'equipement_quincaillerie': ['Quincaillerie', 'Matériaux de construction', 'Outillage', 'Peinture'],
+  'grossiste_fournisseur': ['Grossiste alimentaire', 'Grossiste textile', 'Import/Export', 'Fournisseur de matériel'],
+};
