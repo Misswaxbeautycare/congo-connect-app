@@ -9,6 +9,7 @@ import '../models/shop.dart';
 import '../services/shop_service.dart';
 import '../widgets/category_grid.dart';
 import '../widgets/shop_card.dart';
+import '../widgets/pulsing_quick_action.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -86,10 +87,9 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _QuickActionCard(
+                    child: PulsingQuickAction(
                       icon: Icons.volunteer_activism_outlined,
                       label: 'Dons gratuits',
-                      color: const Color(0xFF2E8B57),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const ListingsPage(type: 'don')),
                       ),
@@ -97,10 +97,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _QuickActionCard(
+                    child: PulsingQuickAction(
                       icon: Icons.swap_horiz,
                       label: 'Troc & Vente rapide',
-                      color: const Color(0xFFF39C12),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const ListingsPage(type: 'troc')),
                       ),
@@ -172,48 +171,6 @@ class _HomePageState extends State<HomePage> {
                     },
                   );
                 },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionCard({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withOpacity(0.25)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5, color: color),
               ),
             ),
           ],
