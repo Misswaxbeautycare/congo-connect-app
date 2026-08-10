@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/shop.dart';
+import '../widgets/location_row.dart';
 import 'appointment_page.dart';
 
 class ShopProfilePage extends StatelessWidget {
@@ -120,7 +121,10 @@ class ShopProfilePage extends StatelessWidget {
                     ],
                     const SizedBox(height: 20),
                     if (shop.address != null && shop.address!.isNotEmpty)
-                      _InfoRow(icon: Icons.location_on_outlined, text: shop.address!),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: LocationRow(location: shop.address!, fontSize: 13),
+                      ),
                     if (shop.phone != null && shop.phone!.isNotEmpty)
                       _InfoRow(icon: Icons.phone_outlined, text: shop.phone!),
                     if (shop.email != null && shop.email!.isNotEmpty)

@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/community_listing.dart';
 import '../services/community_listing_service.dart';
+import '../widgets/location_row.dart';
+import '../widgets/pulsing_action_button.dart';
 import 'create_listing_page.dart';
 
 class ListingsPage extends StatefulWidget {
@@ -47,15 +49,15 @@ class _ListingsPageState extends State<ListingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(_isDon ? 'Dons gratuits' : 'Troc & Vente rapide')),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: PulsingActionButton(
+        icon: Icons.add,
+        label: _isDon ? 'Donner un objet' : 'Proposer',
         onPressed: () async {
           await Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => CreateListingPage(type: widget.type)),
           );
           _refresh();
         },
-        icon: const Icon(Icons.add),
-        label: Text(_isDon ? 'Donner un objet' : 'Proposer'),
       ),
       body: RefreshIndicator(
         onRefresh: _refresh,
@@ -115,17 +117,8 @@ class _ListingsPageState extends State<ListingsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Toutes les photos gardent la même taille/format pour un rendu uniforme
-                      AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: item.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => _imagePlaceholder(),
-                              )
-                            : _imagePlaceholder(),
-                      ),
+                      // Carrousel de photos — toutes au même format 16:9
+                      _ImageCarousel(imageUrls: item.imageUrls, isDon: _isDon),
                       Padding(
                         padding: const EdgeInsets.all(14),
                         child: Column(
@@ -149,18 +142,7 @@ class _ListingsPageState extends State<ListingsPage> {
                             ],
                             const SizedBox(height: 10),
                             if (item.pickupLocation != null && item.pickupLocation!.isNotEmpty)
-                              Row(
-                                children: [
-                                  const Icon(Icons.location_on_outlined, size: 16, color: Colors.black54),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      item.pickupLocation!,
-                                      style: const TextStyle(fontSize: 12.5, color: Colors.black54),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              LocationRow(location: item.pickupLocation!),
                             const SizedBox(height: 4),
                             Row(
                               children: [
@@ -191,16 +173,72 @@ class _ListingsPageState extends State<ListingsPage> {
       ),
     );
   }
+}
 
-  Widget _imagePlaceholder() {
-    return Container(
-      color: (_isDon ? Colors.green : Colors.orange).withOpacity(0.08),
-      alignment: Alignment.center,
-      child: Icon(
-        _isDon ? Icons.volunteer_activism_outlined : Icons.swap_horiz,
-        color: _isDon ? Colors.green : Colors.orange,
-        size: 32,
-      ),
+class _ImageCarousel extends StatefulWidget {
+  final List<String> imageUrls;
+  final bool isDon;
+
+  const _ImageCarousel({required this.imageUrls, required this.isDon});
+
+  @override
+  State<_ImageCarousel> createState() => _ImageCarouselState();
+}
+
+class _ImageCarouselState extends State<_ImageCarousel> {
+  int _page = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.imageUrls.isEmpty) {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Container(
+          color: (widget.isDon ? Colors.green : Colors.orange).withOpacity(0.08),
+          alignment: Alignment.center,
+          child: Icon(
+            widget.isDon ? Icons.volunteer_activism_outlined : Icons.swap_horiz,
+            color: widget.isDon ? Colors.green : Colors.orange,
+            size: 32,
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: PageView.builder(
+            itemCount: widget.imageUrls.length,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemBuilder: (context, i) => CachedNetworkImage(
+              imageUrl: widget.imageUrls[i],
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        if (widget.imageUrls.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                widget.imageUrls.length,
+                (i) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: i == _page ? Colors.white : Colors.white54,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

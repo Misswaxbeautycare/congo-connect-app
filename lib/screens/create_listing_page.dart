@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/community_listing_service.dart';
-import '../widgets/photo_picker_field.dart';
+import '../widgets/multi_photo_picker_field.dart';
 
 class CreateListingPage extends StatefulWidget {
   final String type; // 'don' ou 'troc'
@@ -20,7 +20,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
   final _phoneController = TextEditingController();
   final _locationController = TextEditingController();
 
-  String? _imageUrl;
+  List<String> _imageUrls = [];
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -50,7 +50,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
         type: widget.type,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        imageUrl: _imageUrl,
+        imageUrls: _imageUrls,
         price: _isDon ? null : double.tryParse(_priceController.text.trim()),
         contactName: _nameController.text.trim(),
         contactPhone: _phoneController.text.trim(),
@@ -104,10 +104,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              PhotoPickerField(
+              MultiPhotoPickerField(
                 folder: widget.type,
-                label: 'Ajouter une photo de l\'objet',
-                onImageUploaded: (url) => setState(() => _imageUrl = url),
+                maxImages: 4,
+                onImagesChanged: (urls) => setState(() => _imageUrls = urls),
               ),
               const SizedBox(height: 16),
               TextFormField(

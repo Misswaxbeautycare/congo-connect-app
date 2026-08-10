@@ -3,7 +3,7 @@ class CommunityListing {
   final String type; // 'don' ou 'troc'
   final String title;
   final String? description;
-  final String? imageUrl;
+  final List<String> imageUrls;
   final double? price;
   final String contactName;
   final String contactPhone;
@@ -16,7 +16,7 @@ class CommunityListing {
     required this.type,
     required this.title,
     this.description,
-    this.imageUrl,
+    this.imageUrls = const [],
     this.price,
     required this.contactName,
     required this.contactPhone,
@@ -26,12 +26,14 @@ class CommunityListing {
   });
 
   factory CommunityListing.fromMap(Map<String, dynamic> map) {
+    final urls = (map['image_urls'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
+    final legacy = map['image_url'] as String?;
     return CommunityListing(
       id: map['id'] as String,
       type: map['type'] as String? ?? 'don',
       title: map['title'] as String? ?? '',
       description: map['description'] as String?,
-      imageUrl: map['image_url'] as String?,
+      imageUrls: urls.isNotEmpty ? urls : (legacy != null && legacy.isNotEmpty ? [legacy] : const []),
       price: (map['price'] as num?)?.toDouble(),
       contactName: map['contact_name'] as String? ?? '',
       contactPhone: map['contact_phone'] as String? ?? '',

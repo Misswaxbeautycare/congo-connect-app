@@ -4,6 +4,7 @@ import '../main.dart';
 import '../models/category.dart';
 import '../models/shop.dart';
 import '../services/shop_service.dart';
+import '../widgets/pulsing_action_button.dart';
 import 'shop_profile_page.dart';
 import 'create_shop_page.dart';
 import 'login_page.dart';
@@ -80,7 +81,9 @@ class _CategoryPageState extends State<CategoryPage> {
                   ),
                   const SizedBox(height: 20),
                   Center(
-                    child: FilledButton.icon(
+                    child: PulsingActionButton(
+                      icon: Icons.add_business_outlined,
+                      label: 'Créer ma boutique ici',
                       onPressed: () {
                         if (supabase.auth.currentUser != null) {
                           Navigator.of(context).push(
@@ -94,8 +97,6 @@ class _CategoryPageState extends State<CategoryPage> {
                           );
                         }
                       },
-                      icon: const Icon(Icons.add_business_outlined),
-                      label: const Text('Créer ma boutique ici'),
                     ),
                   ),
                 ],
