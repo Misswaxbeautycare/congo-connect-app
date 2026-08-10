@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'create_shop_page.dart';
 import 'login_page.dart';
+import 'category_page.dart';
+import 'shop_profile_page.dart';
 import '../models/shop.dart';
 import '../services/shop_service.dart';
 import '../widgets/category_grid.dart';
@@ -88,8 +90,8 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 12),
             CategoryGrid(
               onTapModule: (moduleKey) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Module sélectionné : $moduleKey')),
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => CategoryPage(moduleKey: moduleKey)),
                 );
               },
             ),
@@ -128,7 +130,15 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: shops.length,
                     itemBuilder: (context, index) {
-                      return ShopCard(shop: shops[index]);
+                      final shop = shops[index];
+                      return ShopCard(
+                        shop: shop,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => ShopProfilePage(shop: shop)),
+                          );
+                        },
+                      );
                     },
                   );
                 },
