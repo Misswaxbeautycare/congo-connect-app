@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/community_listing_service.dart';
+import '../services/my_listings_store.dart';
 import '../widgets/multi_photo_picker_field.dart';
 
 class CreateListingPage extends StatefulWidget {
@@ -46,7 +47,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
     });
 
     try {
-      await CommunityListingService.createListing(
+      final id = await CommunityListingService.createListing(
         type: widget.type,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -56,6 +57,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
         contactPhone: _phoneController.text.trim(),
         pickupLocation: _locationController.text.trim(),
       );
+      await MyListingsStore.addListingId(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_isDon ? 'Ton don a été publié !' : 'Ton annonce a été publiée !')),

@@ -14,6 +14,8 @@ import '../widgets/ad_banner.dart';
 import '../widgets/sell_banner.dart';
 import 'ad_request_page.dart';
 import 'premium_page.dart';
+import 'my_listings_page.dart';
+import 'search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -56,22 +58,43 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.workspace_premium_outlined),
-            tooltip: 'Boutique Premium',
+            icon: const Icon(Icons.list_alt_outlined),
+            tooltip: 'Mes annonces',
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PremiumPage()),
+                MaterialPageRoute(builder: (_) => const MyListingsPage()),
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.campaign_outlined),
-            tooltip: 'Demander une publicité',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AdRequestPage()),
-              );
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'premium') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PremiumPage()),
+                );
+              } else if (value == 'ad') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdRequestPage()),
+                );
+              }
             },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'premium',
+                child: ListTile(
+                  leading: Icon(Icons.workspace_premium_outlined),
+                  title: Text('Boutique Premium'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'ad',
+                child: ListTile(
+                  leading: Icon(Icons.campaign_outlined),
+                  title: Text('Demander une publicité'),
+                ),
+              ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.notifications_none),
@@ -91,6 +114,12 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
+                readOnly: true,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SearchPage()),
+                  );
+                },
                 decoration: InputDecoration(
                   hintText: 'Rechercher un service, une boutique...',
                   prefixIcon: const Icon(Icons.search),
