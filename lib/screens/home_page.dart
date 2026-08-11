@@ -11,6 +11,7 @@ import '../widgets/category_grid.dart';
 import '../widgets/shop_card.dart';
 import '../widgets/pulsing_quick_action.dart';
 import '../widgets/ad_banner.dart';
+import '../widgets/sell_banner.dart';
 import 'ad_request_page.dart';
 import 'premium_page.dart';
 
@@ -104,6 +105,8 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 20),
             const AdBanner(),
+            const SizedBox(height: 16),
+            const SellBanner(),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -1,10 +1,13 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/advertisement.dart';
 import '../services/advertisement_service.dart';
 
+/// Bandeau de publicités "à la une" — cartes qui défilent horizontalement
+/// avec le titre en superposition et un bouton "Découvrir", façon Leboncoin.
+/// Chaque carte correspond à une ligne ajoutée manuellement dans la table
+/// `advertisements` de Supabase (pour les commerçants qui ont payé).
 class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
 
@@ -14,35 +17,11 @@ class AdBanner extends StatefulWidget {
 
 class _AdBannerState extends State<AdBanner> {
   late Future<List<Advertisement>> _future;
-  final PageController _controller = PageController();
-  Timer? _timer;
-  int _page = 0;
 
   @override
   void initState() {
     super.initState();
     _future = AdvertisementService.getActiveAds();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _startAutoScroll(int count) {
-    _timer?.cancel();
-    if (count <= 1) return;
-    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!mounted || !_controller.hasClients) return;
-      _page = (_page + 1) % count;
-      _controller.animateToPage(
-        _page,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    });
   }
 
   Future<void> _openAd(Advertisement ad) async {
@@ -70,53 +49,103 @@ class _AdBannerState extends State<AdBanner> {
         }
         if (ads.isEmpty) return const SizedBox.shrink();
 
-        WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll(ads.length));
+        return SizedBox(
+          height: 190,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: ads.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, i) {
+              final ad = ads[i];
+              return _FeaturedCard(ad: ad, onTap: () => _openAd(ad));
+            },
+          ),
+        );
+      },
+    );
+  }
+}
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AspectRatio(
-            aspectRatio: 16 / 6.5,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: Stack(
+class _FeaturedCard extends StatelessWidget {
+  final Advertisement ad;
+  final VoidCallback onTap;
+
+  const _FeaturedCard({required this.ad, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 150,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CachedNetworkImage(
+              imageUrl: ad.imageUrl,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+            // Dégradé sombre pour lire le texte, comme sur Leboncoin
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.75)],
+                  stops: const [0.4, 1.0],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black45,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text('Publicité', style: TextStyle(color: Colors.white, fontSize: 9)),
+              ),
+            ),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PageView.builder(
-                    controller: _controller,
-                    itemCount: ads.length,
-                    onPageChanged: (i) => _page = i,
-                    itemBuilder: (context, i) {
-                      final ad = ads[i];
-                      return GestureDetector(
-                        onTap: () => _openAd(ad),
-                        child: CachedNetworkImage(
-                          imageUrl: ad.imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                        ),
-                      );
-                    },
+                  Text(
+                    ad.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'Publicité',
-                        style: TextStyle(color: Colors.white, fontSize: 10),
-                      ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Découvrir',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
