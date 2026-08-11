@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/advertisement_service.dart';
 import '../widgets/photo_picker_field.dart';
+import '../config/payment_links.dart';
 
 class AdRequestPage extends StatefulWidget {
   const AdRequestPage({super.key});
@@ -27,6 +29,13 @@ class _AdRequestPageState extends State<AdRequestPage> {
     super.dispose();
   }
 
+  Future<void> _openPayment() async {
+    final uri = Uri.parse(PaymentLinks.advertisement);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -43,8 +52,11 @@ class _AdRequestPageState extends State<AdRequestPage> {
         imageUrl: _imageUrl,
       );
       if (!mounted) return;
+      // Ouvre directement le paiement Stripe après l'envoi de la demande
+      await _openPayment();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ta demande de publicité a été envoyée ! Nous te contacterons.')),
+        const SnackBar(content: Text('Demande envoyée ! Finalise le paiement pour activer ta publicité.')),
       );
       Navigator.of(context).pop();
     } catch (e) {
@@ -78,7 +90,7 @@ class _AdRequestPageState extends State<AdRequestPage> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Fais la promotion de ta boutique ou de ton service en tête de l\'accueil. Envoie ta demande, notre équipe te recontactera pour valider et lancer ta publicité.',
+                        'Fais la promotion de ta boutique ou de ton service en tête de l\'accueil. Remplis le formulaire, puis finalise le paiement Stripe qui s\'ouvrira automatiquement — ta pub est activée sous 24h après vérification.',
                         style: TextStyle(fontSize: 12.5, height: 1.4),
                       ),
                     ),
@@ -121,7 +133,7 @@ class _AdRequestPageState extends State<AdRequestPage> {
                   : FilledButton(
                       onPressed: _submit,
                       style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                      child: const Text('Envoyer ma demande'),
+                      child: const Text('Envoyer et payer'),
                     ),
             ],
           ),

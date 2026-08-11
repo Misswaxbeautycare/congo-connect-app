@@ -12,6 +12,7 @@ import '../widgets/shop_card.dart';
 import '../widgets/pulsing_quick_action.dart';
 import '../widgets/ad_banner.dart';
 import 'ad_request_page.dart';
+import 'premium_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -51,6 +52,15 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(builder: (_) => const LoginPage()),
                 );
               }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.workspace_premium_outlined),
+            tooltip: 'Boutique Premium',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PremiumPage()),
+              );
             },
           ),
           IconButton(
