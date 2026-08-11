@@ -61,6 +61,28 @@ class ShopService {
     await supabase.from('shops').delete().eq('id', shopId);
   }
 
+  // --- Administration ---
+
+  static Future<List<Shop>> getPendingShops() async {
+    final response = await supabase
+        .from('shops')
+        .select()
+        .eq('verification_status', 'pending')
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((item) => Shop.fromMap(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<void> setShopVerification(String shopId, String status) async {
+    // status: 'verified' | 'rejected' | 'pending'
+    await supabase.from('shops').update({
+      'verification_status': status,
+      'status': status == 'verified' ? 'approved' : 'pending',
+    }).eq('id', shopId);
+  }
+
   static Future<void> createShop({
     required String name,
     required String category,

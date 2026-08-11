@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../services/shop_service.dart';
 import '../widgets/photo_picker_field.dart';
+import 'terms_page.dart';
 
 class CreateShopPage extends StatefulWidget {
   final String? initialCategory;
@@ -26,6 +27,7 @@ class _CreateShopPageState extends State<CreateShopPage> {
   String? _subcategory;
   String _paymentMethod = 'especes';
   bool _acceptsAppointments = false;
+  bool _acceptedTerms = false;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -61,6 +63,10 @@ class _CreateShopPageState extends State<CreateShopPage> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_acceptedTerms) {
+      setState(() => _errorMessage = 'Tu dois accepter les conditions d\'utilisation pour continuer.');
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -189,6 +195,30 @@ class _CreateShopPageState extends State<CreateShopPage> {
                 title: const Text('Accepte les rendez-vous'),
                 value: _acceptsAppointments,
                 onChanged: (value) => setState(() => _acceptsAppointments = value),
+              ),
+              const SizedBox(height: 4),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _acceptedTerms,
+                onChanged: (value) => setState(() => _acceptedTerms = value ?? false),
+                title: GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TermsPage()),
+                  ),
+                  child: const Text.rich(
+                    TextSpan(
+                      text: 'J\'accepte les ',
+                      style: TextStyle(fontSize: 13),
+                      children: [
+                        TextSpan(
+                          text: 'conditions d\'utilisation',
+                          style: TextStyle(color: Color(0xFF0057B8), decoration: TextDecoration.underline),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               if (_errorMessage != null)

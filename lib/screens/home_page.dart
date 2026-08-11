@@ -16,6 +16,9 @@ import 'ad_request_page.dart';
 import 'premium_page.dart';
 import 'my_listings_page.dart';
 import 'search_page.dart';
+import 'admin_page.dart';
+import 'about_page.dart';
+import '../config/admin_config.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -77,9 +80,17 @@ class _HomePageState extends State<HomePage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdRequestPage()),
                 );
+              } else if (value == 'admin') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminPage()),
+                );
+              } else if (value == 'about') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AboutPage()),
+                );
               }
             },
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'premium',
                 child: ListTile(
@@ -92,6 +103,21 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.campaign_outlined),
                   title: Text('Demander une publicité'),
+                ),
+              ),
+              if (AdminConfig.isAdmin(supabase.auth.currentUser?.email))
+                const PopupMenuItem(
+                  value: 'admin',
+                  child: ListTile(
+                    leading: Icon(Icons.admin_panel_settings_outlined),
+                    title: Text('Administration'),
+                  ),
+                ),
+              const PopupMenuItem(
+                value: 'about',
+                child: ListTile(
+                  leading: Icon(Icons.info_outline),
+                  title: Text('À propos'),
                 ),
               ),
             ],
