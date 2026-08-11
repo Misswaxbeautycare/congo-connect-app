@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/community_listing.dart';
 import '../services/community_listing_service.dart';
+import '../widgets/location_row.dart';
 import '../widgets/pulsing_action_button.dart';
 import 'create_listing_page.dart';
-import 'listing_detail_page.dart';
 
 class ListingsPage extends StatefulWidget {
   final String type; // 'don' ou 'troc'
@@ -31,6 +32,17 @@ class _ListingsPageState extends State<ListingsPage> {
       _future = CommunityListingService.getListings(widget.type);
     });
     await _future;
+  }
+
+  Future<void> _call(String phone) async {
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Impossible de lancer l\'appel')),
+      );
+    }
   }
 
   @override
@@ -82,26 +94,86 @@ class _ListingsPageState extends State<ListingsPage> {
                 ],
               );
             }
-            // Grille 2 colonnes façon Marketplace : image carrée, prix en gros, titre en dessous
-            return GridView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 90),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.72,
-              ),
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
               itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final item = items[index];
-                return _MarketplaceStyleCard(
-                  item: item,
-                  isDon: _isDon,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => ListingDetailPage(listing: item)),
-                    );
-                  },
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Photo (ou carrousel si plusieurs), toujours recadrée au même format
+                      _ImageCarousel(imageUrls: item.imageUrls, isDon: _isDon),
+                      Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                ),
+                                if (item.price != null)
+                                  Text(
+                                    '${item.price!.toStringAsFixed(0)} FC',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFF39C12)),
+                                  )
+                                else if (_isDon)
+                                  const Text(
+                                    'GRATUIT',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2E8B57)),
+                                  ),
+                              ],
+                            ),
+                            if (item.description != null && item.description!.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(item.description!, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                            ],
+                            const SizedBox(height: 10),
+                            if (item.pickupLocation != null && item.pickupLocation!.isNotEmpty)
+                              LocationRow(location: item.pickupLocation!),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.person_outline, size: 16, color: Colors.black45),
+                                const SizedBox(width: 4),
+                                Text(item.contactName, style: const TextStyle(fontSize: 12.5, color: Colors.black45)),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                onPressed: () => _call(item.contactPhone),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0057B8),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                icon: const Icon(Icons.call, size: 18),
+                                label: Text('Appeler ${item.contactPhone}'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             );
@@ -112,108 +184,71 @@ class _ListingsPageState extends State<ListingsPage> {
   }
 }
 
-class _MarketplaceStyleCard extends StatelessWidget {
-  final CommunityListing item;
+class _ImageCarousel extends StatefulWidget {
+  final List<String> imageUrls;
   final bool isDon;
-  final VoidCallback onTap;
 
-  const _MarketplaceStyleCard({
-    required this.item,
-    required this.isDon,
-    required this.onTap,
-  });
+  const _ImageCarousel({required this.imageUrls, required this.isDon});
+
+  @override
+  State<_ImageCarousel> createState() => _ImageCarouselState();
+}
+
+class _ImageCarouselState extends State<_ImageCarousel> {
+  int _page = 0;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    if (widget.imageUrls.isEmpty) {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Container(
+          color: (widget.isDon ? Colors.green : Colors.orange).withOpacity(0.08),
+          alignment: Alignment.center,
+          child: Icon(
+            widget.isDon ? Icons.volunteer_activism_outlined : Icons.swap_horiz,
+            color: widget.isDon ? Colors.green : Colors.orange,
+            size: 32,
+          ),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image carrée, recadrée automatiquement au centre pour un rendu net et uniforme
-            AspectRatio(
-              aspectRatio: 1,
-              child: item.imageUrls.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: item.imageUrls.first,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      errorWidget: (_, __, ___) => _placeholder(),
-                    )
-                  : _placeholder(),
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: PageView.builder(
+            itemCount: widget.imageUrls.length,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemBuilder: (context, i) => CachedNetworkImage(
+              imageUrl: widget.imageUrls[i],
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (item.price != null)
-                    Text(
-                      '${item.price!.toStringAsFixed(0)} FC',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFFF39C12)),
-                    )
-                  else if (isDon)
-                    const Text(
-                      'GRATUIT',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF2E8B57)),
-                    ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12.5, color: Colors.black87),
+          ),
+        ),
+        if (widget.imageUrls.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                widget.imageUrls.length,
+                (i) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: i == _page ? Colors.white : Colors.white54,
                   ),
-                  if (item.pickupLocation != null && item.pickupLocation!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on_outlined, size: 12, color: Colors.black38),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            item.pickupLocation!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 10.5, color: Colors.black38),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _placeholder() {
-    return Container(
-      color: (isDon ? Colors.green : Colors.orange).withOpacity(0.08),
-      alignment: Alignment.center,
-      child: Icon(
-        isDon ? Icons.volunteer_activism_outlined : Icons.swap_horiz,
-        color: isDon ? Colors.green : Colors.orange,
-        size: 28,
-      ),
+          ),
+      ],
     );
   }
 }
