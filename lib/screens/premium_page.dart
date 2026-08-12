@@ -20,10 +20,9 @@ class PremiumPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Boutique Premium')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
           children: [
             const Icon(Icons.workspace_premium, color: Color(0xFFF39C12), size: 48),
             const SizedBox(height: 16),
@@ -35,7 +34,7 @@ class PremiumPage extends StatelessWidget {
             const _Benefit(text: 'Ta boutique apparaît en premier dans sa catégorie'),
             const _Benefit(text: 'Badge "Premium" visible sur ton profil'),
             const _Benefit(text: 'Plus de photos et de visibilité auprès des clients'),
-            const Spacer(),
+            const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -47,17 +46,19 @@ class PremiumPage extends StatelessWidget {
                 style: TextStyle(fontSize: 12.5, height: 1.4),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
+              height: 52,
               child: FilledButton.icon(
                 onPressed: () => _openPayment(context),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFFF39C12),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 icon: const Icon(Icons.lock_outline),
-                label: const Text('Payer et devenir Premium'),
+                label: const Text('Payer et devenir Premium', style: TextStyle(fontWeight: FontWeight.w600)),
               ),
             ),
           ],

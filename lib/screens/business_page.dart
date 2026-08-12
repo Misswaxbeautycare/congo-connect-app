@@ -20,10 +20,9 @@ class BusinessPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Compte Business')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
           children: [
             const Icon(Icons.apartment, color: Color(0xFF0057B8), size: 48),
             const SizedBox(height: 16),
@@ -36,12 +35,12 @@ class BusinessPage extends StatelessWidget {
               'Location d\'appartements, vente de parcelles et de maisons, grossistes multi-produits — une visibilité maximale sur toute l\'application.',
               style: TextStyle(fontSize: 13.5, color: Colors.black54, height: 1.4),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             const _Benefit(text: 'Mise en avant sur toute l\'application, toutes catégories confondues'),
             const _Benefit(text: 'Badge "Compte Vérifié" — renforce la confiance de tes clients'),
             const _Benefit(text: 'Galerie photo illimitée'),
             const _Benefit(text: 'Support prioritaire'),
-            const Spacer(),
+            const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -53,17 +52,19 @@ class BusinessPage extends StatelessWidget {
                 style: TextStyle(fontSize: 12.5, height: 1.4),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
+              height: 52,
               child: FilledButton.icon(
                 onPressed: () => _openPayment(context),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF0057B8),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 icon: const Icon(Icons.lock_outline),
-                label: const Text('Payer et devenir Business'),
+                label: const Text('Payer et devenir Business', style: TextStyle(fontWeight: FontWeight.w600)),
               ),
             ),
           ],

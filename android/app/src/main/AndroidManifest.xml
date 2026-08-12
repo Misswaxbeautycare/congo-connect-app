@@ -33,4 +33,23 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
+    <!-- Nécessaire depuis Android 11 pour que l'app puisse ouvrir des liens
+         web (paiement Stripe, Google Maps) et lancer des appels téléphoniques -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+            <data android:scheme="tel" />
+        </intent>
+    </queries>
 </manifest>
