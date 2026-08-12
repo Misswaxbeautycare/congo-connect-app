@@ -14,6 +14,7 @@ import '../widgets/ad_banner.dart';
 import '../widgets/sell_banner.dart';
 import 'ad_request_page.dart';
 import 'premium_page.dart';
+import 'business_page.dart';
 import 'my_listings_page.dart';
 import 'search_page.dart';
 import 'admin_page.dart';
@@ -76,6 +77,10 @@ class _HomePageState extends State<HomePage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PremiumPage()),
                 );
+              } else if (value == 'business') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const BusinessPage()),
+                );
               } else if (value == 'ad') {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdRequestPage()),
@@ -96,6 +101,13 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.workspace_premium_outlined),
                   title: Text('Boutique Premium'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'business',
+                child: ListTile(
+                  leading: Icon(Icons.apartment),
+                  title: Text('Compte Business'),
                 ),
               ),
               PopupMenuItem(

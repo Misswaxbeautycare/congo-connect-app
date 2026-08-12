@@ -15,5 +15,8 @@ class PaymentLinks {
   static const String premiumShop = 'https://buy.stripe.com/7sY3cveeH5p72FhfEgaEE0d';
 
   /// Lien de paiement pour une publicité / annonce sponsorisée en tête d'accueil.
-  static const String advertisement = 'https://buy.stripe.com/REMPLACE_MOI_PUB';
+  static const String advertisement = 'https://buy.stripe.com/7sY7sL7Qj2cVcfRbo0aEE0e';
+
+  /// Lien de paiement pour le compte "Business" (grossistes, entreprises, immobilier).
+  static const String business = 'https://buy.stripe.com/14AfZh9Yr6tb93F2RuaEE0g';
 }
