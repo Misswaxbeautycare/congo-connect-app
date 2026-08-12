@@ -20,11 +20,14 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   late Future<List<Shop>> _shopsFuture;
+  String? _selectedSubcategory;
 
   AppModule get _module => appModules.firstWhere(
         (m) => m.key == widget.moduleKey,
         orElse: () => AppModule(key: widget.moduleKey, label: widget.moduleKey, emoji: '📦'),
       );
+
+  List<String> get _subcategories => moduleSubcategories[widget.moduleKey] ?? const [];
 
   @override
   void initState() {
@@ -61,69 +64,127 @@ class _CategoryPageState extends State<CategoryPage> {
                 ],
               );
             }
-            final shops = snapshot.data ?? [];
-            if (shops.isEmpty) {
-              return ListView(
-                children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                  Icon(Icons.storefront_outlined, size: 56, color: Colors.grey.shade400),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Aucune boutique dans "${_module.label}" pour le moment.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black54),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Sois le premier à ajouter ta boutique !',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black38, fontSize: 12),
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: PulsingActionButton(
-                      icon: Icons.add_business_outlined,
-                      label: 'Créer ma boutique ici',
-                      onPressed: () {
-                        if (supabase.auth.currentUser != null) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => CreateShopPage(initialCategory: widget.moduleKey),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const LoginPage()),
-                          );
-                        }
-                      },
+            final allShops = snapshot.data ?? [];
+            final shops = _selectedSubcategory == null
+                ? allShops
+                : allShops.where((s) => s.subcategory == _selectedSubcategory).toList();
+
+            return Column(
+              children: [
+                if (_subcategories.isNotEmpty)
+                  SizedBox(
+                    height: 44,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      children: [
+                        _SubcategoryChip(
+                          label: 'Tout',
+                          selected: _selectedSubcategory == null,
+                          onTap: () => setState(() => _selectedSubcategory = null),
+                        ),
+                        ..._subcategories.map((sub) => _SubcategoryChip(
+                              label: sub,
+                              selected: _selectedSubcategory == sub,
+                              onTap: () => setState(() => _selectedSubcategory = sub),
+                            )),
+                      ],
                     ),
                   ),
-                ],
-              );
-            }
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.72,
-              ),
-              itemCount: shops.length,
-              itemBuilder: (context, index) {
-                final shop = shops[index];
-                return _CategoryShopCard(
-                  shop: shop,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => ShopProfilePage(shop: shop)),
-                    );
-                  },
-                );
-              },
+                Expanded(
+                  child: shops.isEmpty
+                      ? ListView(
+                          children: [
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+                            Icon(Icons.storefront_outlined, size: 56, color: Colors.grey.shade400),
+                            const SizedBox(height: 12),
+                            Text(
+                              _selectedSubcategory == null
+                                  ? 'Aucune boutique dans "${_module.label}" pour le moment.'
+                                  : 'Aucune boutique dans "$_selectedSubcategory" pour le moment.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Sois le premier à ajouter ta boutique !',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.black38, fontSize: 12),
+                            ),
+                            const SizedBox(height: 20),
+                            Center(
+                              child: PulsingActionButton(
+                                icon: Icons.add_business_outlined,
+                                label: 'Créer ma boutique ici',
+                                onPressed: () {
+                                  if (supabase.auth.currentUser != null) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => CreateShopPage(initialCategory: widget.moduleKey),
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 16,
+                            childAspectRatio: 0.72,
+                          ),
+                          itemCount: shops.length,
+                          itemBuilder: (context, index) {
+                            final shop = shops[index];
+                            return _CategoryShopCard(
+                              shop: shop,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => ShopProfilePage(shop: shop)),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _SubcategoryChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SubcategoryChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label, style: const TextStyle(fontSize: 12.5)),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        selectedColor: const Color(0xFF0057B8),
+        labelStyle: TextStyle(color: selected ? Colors.white : Colors.black87),
+        backgroundColor: Colors.grey.shade100,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: selected ? const Color(0xFF0057B8) : Colors.grey.shade300),
         ),
       ),
     );
