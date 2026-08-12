@@ -6,7 +6,7 @@
 /// et des publicités).
 class AdminConfig {
   static const List<String> adminEmails = [
-    'REMPLACE_MOI@exemple.com',
+    'missnyunge@gmail.com',
   ];
 
   static bool isAdmin(String? email) {
