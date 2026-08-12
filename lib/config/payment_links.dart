@@ -12,7 +12,7 @@
 /// (is_premium pour une boutique, status='active' pour une pub) à vrai.
 class PaymentLinks {
   /// Lien de paiement pour qu'une boutique devienne "Premium / mise en avant".
-  static const String premiumShop = 'https://buy.stripe.com/REMPLACE_MOI_PREMIUM';
+  static const String premiumShop = 'https://buy.stripe.com/7sY3cveeH5p72FhfEgaEE0d';
 
   /// Lien de paiement pour une publicité / annonce sponsorisée en tête d'accueil.
   static const String advertisement = 'https://buy.stripe.com/REMPLACE_MOI_PUB';
