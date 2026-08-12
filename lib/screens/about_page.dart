@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'terms_page.dart';
 import 'privacy_policy_page.dart';
+import 'legal_notice_page.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -32,6 +33,14 @@ class AboutPage extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: const Text('Mentions légales'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const LegalNoticePage()),
             ),
           ),
         ],

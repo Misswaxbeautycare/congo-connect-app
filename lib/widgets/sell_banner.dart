@@ -3,6 +3,7 @@ import '../main.dart';
 import '../screens/create_shop_page.dart';
 import '../screens/login_page.dart';
 import '../screens/create_listing_page.dart';
+import '../screens/ad_request_page.dart';
 
 /// Bandeau incitatif coloré "C'est le moment de vendre / Déposer une
 /// annonce", inspiré de Leboncoin. Au tap, propose de choisir le type
@@ -66,6 +67,17 @@ class SellBanner extends StatelessWidget {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const CreateListingPage(type: 'don')),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.campaign_outlined, color: Color(0xFFF39C12)),
+                  title: const Text('Demander votre publicité'),
+                  subtitle: const Text('Souscris à une publicité pour mettre tes produits à la une'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AdRequestPage()),
                     );
                   },
                 ),
