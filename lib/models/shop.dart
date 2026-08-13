@@ -1,5 +1,6 @@
 class Shop {
   final String id;
+  final String? ownerId;
   final String name;
   final String category;
   final String? subcategory;
@@ -23,6 +24,7 @@ class Shop {
 
   Shop({
     required this.id,
+    this.ownerId,
     required this.name,
     required this.category,
     this.subcategory,
@@ -48,6 +50,7 @@ class Shop {
   factory Shop.fromMap(Map<String, dynamic> map) {
     return Shop(
       id: map['id'] as String,
+      ownerId: map['owner_id'] as String?,
       name: map['name'] as String? ?? '',
       category: map['category'] as String? ?? '',
       subcategory: map['subcategory'] as String?,

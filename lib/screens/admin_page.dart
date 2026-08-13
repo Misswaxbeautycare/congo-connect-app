@@ -4,6 +4,7 @@ import '../models/shop.dart';
 import '../models/ad_request.dart';
 import '../services/shop_service.dart';
 import '../services/advertisement_service.dart';
+import '../services/notification_service.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -71,6 +72,15 @@ class _PendingShopsTab extends StatelessWidget {
 
   Future<void> _act(BuildContext context, Shop shop, String status) async {
     await ShopService.setShopVerification(shop.id, status);
+    if (shop.ownerId != null) {
+      await NotificationService.notifyUser(
+        userId: shop.ownerId!,
+        title: status == 'verified' ? 'Boutique validée ✅' : 'Boutique rejetée',
+        body: status == 'verified'
+            ? 'Ta boutique "${shop.name}" est maintenant visible dans l\'application !'
+            : 'Ta boutique "${shop.name}" n\'a pas été validée. Contacte-nous pour en savoir plus.',
+      );
+    }
     onChanged();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

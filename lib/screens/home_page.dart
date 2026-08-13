@@ -20,6 +20,8 @@ import 'search_page.dart';
 import 'admin_page.dart';
 import 'about_page.dart';
 import '../config/admin_config.dart';
+import 'notifications_page.dart';
+import '../services/notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,11 +32,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<Shop>> _featuredShopsFuture;
+  late Future<int> _unreadCountFuture;
 
   @override
   void initState() {
     super.initState();
     _featuredShopsFuture = ShopService.getFeaturedShops();
+    _unreadCountFuture = NotificationService.getUnreadCount();
   }
 
   @override
@@ -134,9 +138,26 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+          FutureBuilder<int>(
+            future: _unreadCountFuture,
+            builder: (context, snapshot) {
+              final count = snapshot.data ?? 0;
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: count > 0,
+                  label: Text('$count'),
+                  child: const Icon(Icons.notifications_none),
+                ),
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const NotificationsPage()),
+                  );
+                  setState(() {
+                    _unreadCountFuture = NotificationService.getUnreadCount();
+                  });
+                },
+              );
+            },
           ),
         ],
       ),
