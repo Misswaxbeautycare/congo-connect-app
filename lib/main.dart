@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_page.dart';
+import 'services/remember_me_store.dart';
 
 const supabaseUrl = 'https://kiyruyneaaiwveblaucf.supabase.co';
 const supabaseAnonKey = 'sb_publishable_z2dH9HoqzI5HSXbwEcWCXg_AhVielKx';
@@ -19,8 +20,38 @@ Future<void> main() async {
 
 final supabase = Supabase.instance.client;
 
-class CongoConnectApp extends StatelessWidget {
+class CongoConnectApp extends StatefulWidget {
   const CongoConnectApp({super.key});
+
+  @override
+  State<CongoConnectApp> createState() => _CongoConnectAppState();
+}
+
+class _CongoConnectAppState extends State<CongoConnectApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Si l'utilisateur a décoché "Se souvenir de moi", on le déconnecte
+    // quand il ferme complètement l'application.
+    if (state == AppLifecycleState.detached) {
+      RememberMeStore.getRememberMe().then((remember) {
+        if (!remember) {
+          supabase.auth.signOut();
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

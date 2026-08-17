@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/remember_me_store.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
 
@@ -15,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _rememberMe = true;
   String? _errorMessage;
 
   Future<void> _login() async {
@@ -27,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      await RememberMeStore.setRememberMe(_rememberMe);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomePage()),
@@ -116,6 +119,20 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: _showForgotPasswordDialog,
                 child: const Text('Mot de passe oublié ?'),
               ),
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: _rememberMe,
+                  onChanged: (value) => setState(() => _rememberMe = value ?? true),
+                ),
+                const Expanded(
+                  child: Text(
+                    'Se souvenir de moi — reste connecté(e) automatiquement',
+                    style: TextStyle(fontSize: 13, color: Colors.black54),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             if (_errorMessage != null)
