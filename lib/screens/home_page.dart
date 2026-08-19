@@ -6,8 +6,8 @@ import 'category_page.dart';
 import 'shop_profile_page.dart';
 import 'listings_page.dart';
 import '../models/shop.dart';
+import '../models/category.dart';
 import '../services/shop_service.dart';
-import '../widgets/category_grid.dart';
 import '../widgets/shop_card.dart';
 import '../widgets/pulsing_quick_action.dart';
 import '../widgets/ad_banner.dart';
@@ -44,6 +44,52 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                child: const Text(
+                  'Catégories',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: appModules.length,
+                  itemBuilder: (context, index) {
+                    final module = appModules[index];
+                    return ListTile(
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0057B8).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(module.emoji, style: const TextStyle(fontSize: 20)),
+                      ),
+                      title: Text(module.label),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => CategoryPage(moduleKey: module.key)),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
         title: const Text(
           'Congo Connect',
@@ -192,9 +238,9 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            const AdBanner(),
-            const SizedBox(height: 16),
             const SellBanner(),
+            const SizedBox(height: 16),
+            const AdBanner(),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -223,22 +269,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 24),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Explorer par catégorie',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 12),
-            CategoryGrid(
-              onTapModule: (moduleKey) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => CategoryPage(moduleKey: moduleKey)),
-                );
-              },
-            ),
-            const SizedBox(height: 28),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
