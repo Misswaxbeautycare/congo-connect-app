@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_page.dart';
+import 'screens/reset_password_page.dart';
 import 'services/remember_me_store.dart';
 
 const supabaseUrl = 'https://kiyruyneaaiwveblaucf.supabase.co';
@@ -19,6 +20,7 @@ Future<void> main() async {
 }
 
 final supabase = Supabase.instance.client;
+final navigatorKey = GlobalKey<NavigatorState>();
 
 class CongoConnectApp extends StatefulWidget {
   const CongoConnectApp({super.key});
@@ -32,6 +34,15 @@ class _CongoConnectAppState extends State<CongoConnectApp> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Quand le lien "mot de passe oublié" est ouvert, Supabase déclenche
+    // cet événement — on redirige alors vers l'écran de nouveau mot de passe.
+    supabase.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.passwordRecovery) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const ResetPasswordPage()),
+        );
+      }
+    });
   }
 
   @override
@@ -58,6 +69,7 @@ class _CongoConnectAppState extends State<CongoConnectApp> with WidgetsBindingOb
     return MaterialApp(
       title: 'Congo Connect',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(

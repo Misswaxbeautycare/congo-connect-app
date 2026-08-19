@@ -28,7 +28,10 @@ class AuthService {
   }
 
   static Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+    await _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'congoconnect://reset-password',
+    );
   }
 
   static User? get currentUser => _client.auth.currentUser;
