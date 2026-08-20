@@ -61,22 +61,39 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          controller: _controller,
-          autofocus: true,
-          onChanged: _onChanged,
-          onSubmitted: _runSearch,
-          style: const TextStyle(color: Colors.white),
-          cursorColor: Colors.white,
-          decoration: InputDecoration(
-            hintText: 'Rechercher une boutique, un service, un objet...',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-            border: InputBorder.none,
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.search, color: Colors.white),
-              onPressed: () => _runSearch(_controller.text),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                autofocus: true,
+                onChanged: _onChanged,
+                onSubmitted: _runSearch,
+                style: const TextStyle(color: Colors.white),
+                cursorColor: Colors.white,
+                decoration: InputDecoration(
+                  hintText: 'Rechercher une boutique, un service, un objet...',
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  border: InputBorder.none,
+                ),
+              ),
             ),
-          ),
+            InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () => _runSearch(_controller.text),
+              child: Container(
+                width: 44,
+                height: 44,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.search, color: Colors.white),
+              ),
+            ),
+          ],
         ),
       ),
       body: _loading
