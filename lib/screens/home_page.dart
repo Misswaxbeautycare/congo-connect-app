@@ -240,8 +240,6 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 20),
             const SellBanner(),
             const SizedBox(height: 16),
-            const AdBanner(),
-            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -268,6 +266,8 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            const AdBanner(),
             const SizedBox(height: 24),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
