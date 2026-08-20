@@ -72,4 +72,22 @@ class CommunityListingService {
   static Future<void> deleteListing(String id) async {
     await supabase.from('community_listings').delete().eq('id', id);
   }
+
+  static Future<List<CommunityListing>> getAllListingsForAdmin() async {
+    final response = await supabase
+        .from('community_listings')
+        .select()
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((item) => CommunityListing.fromMap(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<int> countListings({String? type}) async {
+    var query = supabase.from('community_listings').select('id');
+    if (type != null) query = query.eq('type', type);
+    final response = await query;
+    return (response as List).length;
+  }
 }

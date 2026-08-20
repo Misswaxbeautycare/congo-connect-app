@@ -114,4 +114,26 @@ class ShopService {
       'verification_status': 'pending',
     });
   }
+
+  static Future<List<Shop>> getAllShopsForAdmin() async {
+    final response = await supabase
+        .from('shops')
+        .select()
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((item) => Shop.fromMap(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<void> adminDeleteShop(String shopId) async {
+    await supabase.from('shops').delete().eq('id', shopId);
+  }
+
+  static Future<int> countShops({String? status}) async {
+    var query = supabase.from('shops').select('id');
+    if (status != null) query = query.eq('status', status);
+    final response = await query;
+    return (response as List).length;
+  }
 }

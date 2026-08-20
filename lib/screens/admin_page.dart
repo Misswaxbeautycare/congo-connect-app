@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/shop.dart';
 import '../models/ad_request.dart';
+import '../models/community_listing.dart';
 import '../services/shop_service.dart';
 import '../services/advertisement_service.dart';
 import '../services/notification_service.dart';
+import '../services/community_listing_service.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -17,17 +19,42 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   late TabController _tabController;
   late Future<List<Shop>> _pendingShopsFuture;
   late Future<List<AdRequest>> _pendingAdsFuture;
+  late Future<List<Shop>> _allShopsFuture;
+  late Future<List<CommunityListing>> _allListingsFuture;
+  late Future<_Stats> _statsFuture;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _load();
   }
 
   void _load() {
     _pendingShopsFuture = ShopService.getPendingShops();
     _pendingAdsFuture = AdvertisementService.getPendingAdRequests();
+    _allShopsFuture = ShopService.getAllShopsForAdmin();
+    _allListingsFuture = CommunityListingService.getAllListingsForAdmin();
+    _statsFuture = _loadStats();
+  }
+
+  Future<_Stats> _loadStats() async {
+    final results = await Future.wait([
+      ShopService.countShops(),
+      ShopService.countShops(status: 'approved'),
+      ShopService.countShops(status: 'pending'),
+      CommunityListingService.countListings(type: 'don'),
+      CommunityListingService.countListings(type: 'troc'),
+      AdvertisementService.getPendingAdRequests(),
+    ]);
+    return _Stats(
+      totalShops: results[0] as int,
+      approvedShops: results[1] as int,
+      pendingShops: results[2] as int,
+      dons: results[3] as int,
+      trocs: results[4] as int,
+      pendingAds: (results[5] as List).length,
+    );
   }
 
   Future<void> _refresh() async {
@@ -47,8 +74,12 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
         title: const Text('Administration'),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           tabs: const [
+            Tab(text: 'Statistiques'),
+            Tab(text: 'À valider'),
             Tab(text: 'Boutiques'),
+            Tab(text: 'Dons/Troc'),
             Tab(text: 'Publicités'),
           ],
         ),
@@ -56,8 +87,96 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
       body: TabBarView(
         controller: _tabController,
         children: [
+          _StatsTab(future: _statsFuture),
           _PendingShopsTab(future: _pendingShopsFuture, onChanged: _refresh),
+          _AllShopsTab(future: _allShopsFuture, onChanged: _refresh),
+          _AllListingsTab(future: _allListingsFuture, onChanged: _refresh),
           _PendingAdsTab(future: _pendingAdsFuture, onChanged: _refresh),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stats {
+  final int totalShops;
+  final int approvedShops;
+  final int pendingShops;
+  final int dons;
+  final int trocs;
+  final int pendingAds;
+
+  _Stats({
+    required this.totalShops,
+    required this.approvedShops,
+    required this.pendingShops,
+    required this.dons,
+    required this.trocs,
+    required this.pendingAds,
+  });
+}
+
+class _StatsTab extends StatelessWidget {
+  final Future<_Stats> future;
+  const _StatsTab({required this.future});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_Stats>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Erreur : ${snapshot.error}'));
+        }
+        final s = snapshot.data!;
+        final cards = [
+          _StatCard(label: 'Boutiques au total', value: s.totalShops, color: const Color(0xFF0057B8), icon: Icons.storefront_outlined),
+          _StatCard(label: 'Boutiques approuvées', value: s.approvedShops, color: const Color(0xFF2E8B57), icon: Icons.verified_outlined),
+          _StatCard(label: 'Boutiques en attente', value: s.pendingShops, color: Colors.orange, icon: Icons.hourglass_empty),
+          _StatCard(label: 'Dons actifs', value: s.dons, color: Colors.green, icon: Icons.volunteer_activism_outlined),
+          _StatCard(label: 'Troc actifs', value: s.trocs, color: Colors.deepOrange, icon: Icons.swap_horiz),
+          _StatCard(label: 'Publicités en attente', value: s.pendingAds, color: Colors.purple, icon: Icons.campaign_outlined),
+        ];
+        return GridView.count(
+          padding: const EdgeInsets.all(16),
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.3,
+          children: cards,
+        );
+      },
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final int value;
+  final Color color;
+  final IconData icon;
+
+  const _StatCard({required this.label, required this.value, required this.color, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Icon(icon, color: color),
+          Text('$value', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color)),
+          Text(label, style: const TextStyle(fontSize: 12.5, color: Colors.black54)),
         ],
       ),
     );
@@ -150,7 +269,167 @@ class _PendingShopsTab extends StatelessWidget {
   }
 }
 
-class _PendingAdsTab extends StatelessWidget {
+class _AllShopsTab extends StatelessWidget {
+  final Future<List<Shop>> future;
+  final VoidCallback onChanged;
+
+  const _AllShopsTab({required this.future, required this.onChanged});
+
+  Future<void> _confirmDelete(BuildContext context, Shop shop) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer cette boutique ?'),
+        content: Text('"${shop.name}" sera définitivement supprimée.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await ShopService.adminDeleteShop(shop.id);
+      onChanged();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Boutique supprimée')));
+      }
+    }
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'verified':
+        return const Color(0xFF2E8B57);
+      case 'pending':
+        return Colors.orange;
+      default:
+        return Colors.red;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Shop>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Erreur : ${snapshot.error}'));
+        }
+        final shops = snapshot.data ?? [];
+        if (shops.isEmpty) {
+          return const Center(child: Text('Aucune boutique.', style: TextStyle(color: Colors.black54)));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: shops.length,
+          itemBuilder: (context, i) {
+            final shop = shops[i];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: _statusColor(shop.verificationStatus).withOpacity(0.15),
+                  child: Icon(Icons.storefront_outlined, color: _statusColor(shop.verificationStatus), size: 20),
+                ),
+                title: Text(shop.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  '${shop.category}${shop.subcategory != null ? " · ${shop.subcategory}" : ""}\nStatut : ${shop.verificationStatus}',
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+                isThreeLine: true,
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: () => _confirmDelete(context, shop),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AllListingsTab extends StatelessWidget {
+  final Future<List<CommunityListing>> future;
+  final VoidCallback onChanged;
+
+  const _AllListingsTab({required this.future, required this.onChanged});
+
+  Future<void> _confirmDelete(BuildContext context, CommunityListing item) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer cette annonce ?'),
+        content: Text('"${item.title}" sera définitivement supprimée.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await CommunityListingService.deleteListing(item.id);
+      onChanged();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Annonce supprimée')));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<CommunityListing>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Erreur : ${snapshot.error}'));
+        }
+        final items = snapshot.data ?? [];
+        if (items.isEmpty) {
+          return const Center(child: Text('Aucune annonce.', style: TextStyle(color: Colors.black54)));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length,
+          itemBuilder: (context, i) {
+            final item = items[i];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: ListTile(
+                leading: Icon(
+                  item.type == 'don' ? Icons.volunteer_activism_outlined : Icons.swap_horiz,
+                  color: item.type == 'don' ? Colors.green : Colors.deepOrange,
+                ),
+                title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  '${item.type == 'don' ? 'Don' : 'Troc'}${item.price != null ? " · ${item.price!.toStringAsFixed(0)} FC" : ""} · ${item.status}',
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: () => _confirmDelete(context, item),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
   final Future<List<AdRequest>> future;
   final VoidCallback onChanged;
 
