@@ -65,9 +65,16 @@ class _SearchPageState extends State<SearchPage> {
           controller: _controller,
           autofocus: true,
           onChanged: _onChanged,
-          decoration: const InputDecoration(
+          onSubmitted: _runSearch,
+          style: const TextStyle(color: Colors.black87),
+          decoration: InputDecoration(
             hintText: 'Rechercher une boutique, un service, un objet...',
+            hintStyle: TextStyle(color: Colors.grey.shade500),
             border: InputBorder.none,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.search, color: Color(0xFF0057B8)),
+              onPressed: () => _runSearch(_controller.text),
+            ),
           ),
         ),
       ),
