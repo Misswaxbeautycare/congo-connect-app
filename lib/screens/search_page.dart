@@ -34,27 +34,44 @@ class _SearchPageState extends State<SearchPage> {
     _debounce = Timer(const Duration(milliseconds: 400), () => _runSearch(query));
   }
 
+  String? _errorMessage;
+
   Future<void> _runSearch(String query) async {
     if (query.trim().length < 2) {
       setState(() {
         _shops = [];
         _listings = [];
         _searched = false;
+        _errorMessage = null;
       });
       return;
     }
-    setState(() => _loading = true);
-    final results = await Future.wait([
-      ShopService.searchShops(query),
-      CommunityListingService.searchListings(query),
-    ]);
-    if (!mounted) return;
     setState(() {
-      _shops = results[0] as List<Shop>;
-      _listings = results[1] as List<CommunityListing>;
-      _loading = false;
-      _searched = true;
+      _loading = true;
+      _errorMessage = null;
     });
+    try {
+      final results = await Future.wait([
+        ShopService.searchShops(query),
+        CommunityListingService.searchListings(query),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _shops = results[0] as List<Shop>;
+        _listings = results[1] as List<CommunityListing>;
+        _loading = false;
+        _searched = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _searched = true;
+        _shops = [];
+        _listings = [];
+        _errorMessage = 'Erreur de recherche : $e';
+      });
+    }
   }
 
   @override
@@ -109,7 +126,18 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 )
-              : (_shops.isEmpty && _listings.isEmpty)
+              : _errorMessage != null
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    )
+                  : (_shops.isEmpty && _listings.isEmpty)
                   ? const Center(child: Text('Aucun résultat trouvé.', style: TextStyle(color: Colors.black54)))
                   : ListView(
                       padding: const EdgeInsets.all(16),
