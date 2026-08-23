@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/remember_me_store.dart';
+import '../services/user_management_service.dart';
+import '../main.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
 
@@ -29,6 +31,15 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      final isBanned = await UserManagementService.isCurrentUserBanned();
+      if (isBanned) {
+        await supabase.auth.signOut();
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = 'Ce compte a été suspendu. Contacte-nous pour plus d\'informations.';
+        });
+        return;
+      }
       await RememberMeStore.setRememberMe(_rememberMe);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(

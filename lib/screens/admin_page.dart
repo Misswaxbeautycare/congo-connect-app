@@ -9,6 +9,7 @@ import '../services/notification_service.dart';
 import '../services/community_listing_service.dart';
 import '../models/property.dart';
 import '../services/property_service.dart';
+import 'manage_users_tab.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -29,7 +30,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
     _load();
   }
 
@@ -86,6 +87,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             Tab(text: 'Dons/Troc'),
             Tab(text: 'Publicités'),
             Tab(text: 'Immobilier'),
+            Tab(text: 'Utilisateurs'),
           ],
         ),
       ),
@@ -98,6 +100,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
           _AllListingsTab(future: _allListingsFuture, onChanged: _refresh),
           _PendingAdsTab(future: _pendingAdsFuture, onChanged: _refresh),
           _PendingPropertiesTab(future: _pendingPropertiesFuture, onChanged: _refresh),
+          const ManageUsersTab(),
         ],
       ),
     );
