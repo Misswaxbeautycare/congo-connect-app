@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/favorite_service.dart';
-import 'login_page.dart';
+import '../screens/login_page.dart';
 
 /// Bouton cœur façon Leboncoin, superposable en overlay sur une carte.
 /// Gère lui-même son état (chargement initial + toggle).

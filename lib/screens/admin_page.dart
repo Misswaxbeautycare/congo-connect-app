@@ -576,6 +576,8 @@ class _AllListingsTab extends StatelessWidget {
     );
   }
 }
+
+class _PendingAdsTab extends StatelessWidget {
   final Future<List<AdRequest>> future;
   final VoidCallback onChanged;
 
