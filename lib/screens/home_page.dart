@@ -22,6 +22,7 @@ import 'about_page.dart';
 import '../config/admin_config.dart';
 import 'notifications_page.dart';
 import '../services/notification_service.dart';
+import 'my_appointments_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -135,6 +136,10 @@ class _HomePageState extends State<HomePage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdRequestPage()),
                 );
+              } else if (value == 'my_appointments') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const MyAppointmentsPage()),
+                );
               } else if (value == 'admin') {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminPage()),
@@ -165,6 +170,13 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.campaign_outlined),
                   title: Text('Demander une publicité'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'my_appointments',
+                child: ListTile(
+                  leading: Icon(Icons.event_note_outlined),
+                  title: Text('Mes rendez-vous'),
                 ),
               ),
               if (AdminConfig.isAdmin(supabase.auth.currentUser?.email))

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../models/shop.dart';
+import '../services/notification_service.dart';
 
 class AppointmentPage extends StatefulWidget {
   final Shop shop;
@@ -15,6 +16,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final _motifController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  String _appointmentMode = 'sur_place';
   bool _saving = false;
 
   @override
@@ -72,8 +74,19 @@ class _AppointmentPageState extends State<AppointmentPage> {
         'client_id': user.id,
         'appointment_time': dateTime.toIso8601String(),
         'motif': _motifController.text.trim(),
+        'appointment_mode': _appointmentMode,
         'status': 'pending',
       });
+      if (widget.shop.ownerId != null) {
+        final modeLabel = _appointmentMode == 'telephonique' ? 'téléphonique' : 'sur place';
+        await NotificationService.notifyUser(
+          userId: widget.shop.ownerId!,
+          title: 'Nouvelle demande de rendez-vous 📅',
+          body: 'Un client souhaite un rendez-vous $modeLabel le '
+              '${dateTime.day}/${dateTime.month}/${dateTime.year} à '
+              '${_selectedTime!.format(context)} pour "${_motifController.text.trim()}".',
+        );
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Demande de rendez-vous envoyée !')),
@@ -122,6 +135,28 @@ class _AppointmentPageState extends State<AppointmentPage> {
               side: BorderSide(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(12),
             ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Type de rendez-vous', style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: ChoiceChip(
+                  label: const Text('Sur place'),
+                  selected: _appointmentMode == 'sur_place',
+                  onSelected: (_) => setState(() => _appointmentMode = 'sur_place'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ChoiceChip(
+                  label: const Text('Téléphonique'),
+                  selected: _appointmentMode == 'telephonique',
+                  onSelected: (_) => setState(() => _appointmentMode = 'telephonique'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           TextField(

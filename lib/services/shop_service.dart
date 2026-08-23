@@ -75,6 +75,25 @@ class ShopService {
         .toList();
   }
 
+  /// Rendez-vous reçus pour toutes les boutiques de l'utilisateur connecté.
+  static Future<List<Map<String, dynamic>>> getMyShopAppointments() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+    final myShops = await getMyShops();
+    if (myShops.isEmpty) return [];
+    final shopIds = myShops.map((s) => s.id).toList();
+    final response = await supabase
+        .from('appointments')
+        .select('*, shops(name)')
+        .inFilter('shop_id', shopIds)
+        .order('appointment_time', ascending: true);
+    return (response as List).cast<Map<String, dynamic>>();
+  }
+
+  static Future<void> setAppointmentStatus(String appointmentId, String status) async {
+    await supabase.from('appointments').update({'status': status}).eq('id', appointmentId);
+  }
+
   static Future<void> setShopVerification(String shopId, String status) async {
     // status: 'verified' | 'rejected' | 'pending'
     await supabase.from('shops').update({
