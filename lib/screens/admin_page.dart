@@ -236,8 +236,22 @@ class _PendingShopsTab extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text('${shop.category}${shop.subcategory != null ? " · ${shop.subcategory}" : ""}',
                         style: const TextStyle(color: Colors.black54, fontSize: 12.5)),
+                    if (shop.bio != null && shop.bio!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(shop.bio!, style: const TextStyle(fontSize: 12.5)),
+                      ),
                     if (shop.phone != null) Text('Tél : ${shop.phone}', style: const TextStyle(fontSize: 12.5)),
+                    if (shop.email != null) Text('Email : ${shop.email}', style: const TextStyle(fontSize: 12.5)),
                     if (shop.address != null) Text('Adresse : ${shop.address}', style: const TextStyle(fontSize: 12.5)),
+                    if (shop.stockQuantity != null)
+                      Text('Stock : ${shop.stockQuantity}', style: const TextStyle(fontSize: 12.5)),
+                    if (shop.paymentMethod != null)
+                      Text('Paiement accepté : ${shop.paymentMethod}', style: const TextStyle(fontSize: 12.5)),
+                    Text(
+                      shop.acceptsAppointments ? 'Accepte les rendez-vous' : "N'accepte pas les rendez-vous",
+                      style: const TextStyle(fontSize: 12.5, fontStyle: FontStyle.italic),
+                    ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
