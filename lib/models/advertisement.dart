@@ -5,6 +5,7 @@ class Advertisement {
   final String? videoUrl;
   final String? contactPhone;
   final String? linkUrl;
+  final int priority;
 
   Advertisement({
     required this.id,
@@ -13,6 +14,7 @@ class Advertisement {
     this.videoUrl,
     this.contactPhone,
     this.linkUrl,
+    this.priority = 0,
   });
 
   bool get isVideo => videoUrl != null && videoUrl!.isNotEmpty;
@@ -25,6 +27,7 @@ class Advertisement {
       videoUrl: map['video_url'] as String?,
       contactPhone: map['contact_phone'] as String?,
       linkUrl: map['link_url'] as String?,
+      priority: map['priority'] as int? ?? 0,
     );
   }
 }

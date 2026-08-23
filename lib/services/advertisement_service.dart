@@ -8,6 +8,7 @@ class AdvertisementService {
         .from('advertisements')
         .select()
         .eq('status', 'active')
+        .order('priority', ascending: false)
         .order('created_at', ascending: false);
 
     return (response as List)
