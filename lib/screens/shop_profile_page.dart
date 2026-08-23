@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/shop.dart';
+import '../main.dart';
 import '../widgets/location_row.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
 import '../widgets/reviews_section.dart';
+import '../services/chat_service.dart';
+import 'chat_conversation_page.dart';
+import 'login_page.dart';
 import 'appointment_page.dart';
 
 class ShopProfilePage extends StatelessWidget {
@@ -21,6 +25,20 @@ class ShopProfilePage extends StatelessWidget {
       'especes_mobile_money': 'Espèces & Mobile Money',
     };
     return labels[key] ?? key;
+  }
+
+  Future<void> _openChat(BuildContext context) async {
+    if (supabase.auth.currentUser == null) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginPage()));
+      return;
+    }
+    final conversationId = await ChatService.getOrCreateConversation(shop.id);
+    if (!context.mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatConversationPage(conversationId: conversationId, title: shop.name),
+      ),
+    );
   }
 
   Future<void> _launch(BuildContext context, Uri uri) async {
@@ -147,6 +165,16 @@ class ShopProfilePage extends StatelessWidget {
                           style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                         ),
                       ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _openChat(context),
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: const Text('Envoyer un message'),
+                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                      ),
+                    ),
                     if (shop.acceptsAppointments) ...[
                       const SizedBox(height: 12),
                       SizedBox(

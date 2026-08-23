@@ -25,6 +25,7 @@ import '../services/notification_service.dart';
 import 'my_appointments_page.dart';
 import 'properties_page.dart';
 import 'favorites_page.dart';
+import 'chat_list_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -152,6 +153,10 @@ class _HomePageState extends State<HomePage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const FavoritesPage()),
                 );
+              } else if (value == 'messages') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ChatListPage()),
+                );
               } else if (value == 'admin') {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminPage()),
@@ -196,6 +201,13 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.favorite_border),
                   title: Text('Mes favoris'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'messages',
+                child: ListTile(
+                  leading: Icon(Icons.chat_bubble_outline),
+                  title: Text('Messages'),
                 ),
               ),
               if (AdminConfig.isAdmin(supabase.auth.currentUser?.email))
