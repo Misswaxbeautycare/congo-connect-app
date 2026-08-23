@@ -118,6 +118,8 @@ class ShopService {
     String? coverUrl,
     int? stockQuantity,
     String? paymentMethod,
+    List<String> galleryPhotos = const [],
+    List<String> specialties = const [],
   }) async {
     final userId = supabase.auth.currentUser!.id;
     await supabase.from('shops').insert({
@@ -133,6 +135,8 @@ class ShopService {
       'cover_url': coverUrl,
       'stock_quantity': stockQuantity,
       'payment_method': paymentMethod,
+      'gallery_photos': galleryPhotos,
+      'specialties': specialties,
       'status': 'pending',
       'verification_status': 'pending',
     });
@@ -153,6 +157,8 @@ class ShopService {
     String? coverUrl,
     int? stockQuantity,
     String? paymentMethod,
+    List<String> galleryPhotos = const [],
+    List<String> specialties = const [],
   }) async {
     await supabase.from('shops').update({
       'name': name,
@@ -166,6 +172,8 @@ class ShopService {
       'cover_url': coverUrl,
       'stock_quantity': stockQuantity,
       'payment_method': paymentMethod,
+      'gallery_photos': galleryPhotos,
+      'specialties': specialties,
       'status': 'pending',
       'verification_status': 'pending',
     }).eq('id', shopId);

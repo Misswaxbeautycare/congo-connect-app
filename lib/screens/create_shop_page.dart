@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../services/shop_service.dart';
+import '../services/image_upload_service.dart';
 import '../widgets/photo_picker_field.dart';
 import 'terms_page.dart';
 
@@ -23,6 +24,10 @@ class _CreateShopPageState extends State<CreateShopPage> {
   final _stockController = TextEditingController();
 
   String? _coverUrl;
+  final List<String> _galleryPhotos = [];
+  bool _uploadingGalleryPhoto = false;
+  final List<String> _specialties = [];
+  final _specialtyController = TextEditingController();
   late String _category;
   String? _subcategory;
   String _paymentMethod = 'especes';
@@ -61,6 +66,34 @@ class _CreateShopPageState extends State<CreateShopPage> {
 
   List<String> get _subcategoryOptions => moduleSubcategories[_category] ?? const [];
 
+  Future<void> _addGalleryPhoto() async {
+    if (_galleryPhotos.length >= 8) return;
+    final file = await ImageUploadService.pickImage();
+    if (file == null) return;
+    setState(() => _uploadingGalleryPhoto = true);
+    try {
+      final url = await ImageUploadService.uploadImage(file, folder: 'shops');
+      if (url != null) setState(() => _galleryPhotos.add(url));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Échec de l\'envoi de la photo')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingGalleryPhoto = false);
+    }
+  }
+
+  void _addSpecialty() {
+    final value = _specialtyController.text.trim();
+    if (value.isEmpty || _specialties.contains(value)) return;
+    setState(() {
+      _specialties.add(value);
+      _specialtyController.clear();
+    });
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptedTerms) {
@@ -86,6 +119,8 @@ class _CreateShopPageState extends State<CreateShopPage> {
         coverUrl: _coverUrl,
         stockQuantity: int.tryParse(_stockController.text.trim()),
         paymentMethod: _paymentMethod,
+        galleryPhotos: _galleryPhotos,
+        specialties: _specialties,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -190,6 +225,91 @@ class _CreateShopPageState extends State<CreateShopPage> {
                     .toList(),
                 onChanged: (value) => setState(() => _paymentMethod = value!),
               ),
+              const SizedBox(height: 16),
+              const Text('Galerie photo (jusqu\'à 8)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 90,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    ..._galleryPhotos.map((url) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(url, width: 90, height: 90, fit: BoxFit.cover),
+                              ),
+                              Positioned(
+                                top: 2, right: 2,
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _galleryPhotos.remove(url)),
+                                  child: const CircleAvatar(
+                                    radius: 10,
+                                    backgroundColor: Colors.black54,
+                                    child: Icon(Icons.close, size: 13, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                    if (_galleryPhotos.length < 8)
+                      InkWell(
+                        onTap: _uploadingGalleryPhoto ? null : _addGalleryPhoto,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          width: 90, height: 90,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: _uploadingGalleryPhoto
+                              ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Spécialités', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _specialtyController,
+                      decoration: const InputDecoration(
+                        hintText: 'Ex : Tresses africaines',
+                        isDense: true,
+                      ),
+                      onSubmitted: (_) => _addSpecialty(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: _addSpecialty,
+                    icon: const Icon(Icons.add_circle, color: Color(0xFF0057B8)),
+                  ),
+                ],
+              ),
+              if (_specialties.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _specialties
+                        .map((s) => Chip(
+                              label: Text(s, style: const TextStyle(fontSize: 12)),
+                              onDeleted: () => setState(() => _specialties.remove(s)),
+                            ))
+                        .toList(),
+                  ),
+                ),
               const SizedBox(height: 8),
               SwitchListTile(
                 title: const Text('Accepte les rendez-vous'),
