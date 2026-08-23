@@ -24,6 +24,8 @@ class _CreateShopPageState extends State<CreateShopPage> {
   final _stockController = TextEditingController();
 
   String? _coverUrl;
+  String? _certificationDocumentUrl;
+  bool _uploadingDocument = false;
   final List<String> _galleryPhotos = [];
   bool _uploadingGalleryPhoto = false;
   final List<String> _specialties = [];
@@ -94,6 +96,24 @@ class _CreateShopPageState extends State<CreateShopPage> {
     });
   }
 
+  Future<void> _uploadDocument() async {
+    final file = await ImageUploadService.pickImage();
+    if (file == null) return;
+    setState(() => _uploadingDocument = true);
+    try {
+      final url = await ImageUploadService.uploadImage(file, folder: 'documents');
+      setState(() => _certificationDocumentUrl = url);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Échec de l\'envoi du document')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingDocument = false);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptedTerms) {
@@ -121,6 +141,7 @@ class _CreateShopPageState extends State<CreateShopPage> {
         paymentMethod: _paymentMethod,
         galleryPhotos: _galleryPhotos,
         specialties: _specialties,
+        certificationDocumentUrl: _certificationDocumentUrl,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -315,6 +336,51 @@ class _CreateShopPageState extends State<CreateShopPage> {
                 title: const Text('Accepte les rendez-vous'),
                 value: _acceptsAppointments,
                 onChanged: (value) => setState(() => _acceptsAppointments = value),
+              ),
+              const SizedBox(height: 16),
+              const Text('Document de vérification (optionnel)',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              const SizedBox(height: 4),
+              const Text(
+                'Carte d\'identité, registre de commerce ou autre document justifiant ton activité. Aide à obtenir le badge "Vérifié".',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: _uploadingDocument ? null : _uploadDocument,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _certificationDocumentUrl != null ? Icons.check_circle : Icons.upload_file_outlined,
+                        color: _certificationDocumentUrl != null ? const Color(0xFF2E8B57) : Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _uploadingDocument
+                              ? 'Envoi en cours...'
+                              : _certificationDocumentUrl != null
+                                  ? 'Document envoyé'
+                                  : 'Ajouter un document (photo)',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      if (_uploadingDocument)
+                        const SizedBox(
+                          width: 16, height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 4),
               CheckboxListTile(

@@ -17,6 +17,7 @@ class Shop {
   final bool isPremium;
   final bool featured;
   final String verificationStatus;
+  final String? certificationDocumentUrl;
   final int? stockQuantity;
   final String? paymentMethod;
   final double ratingAvg;
@@ -41,6 +42,7 @@ class Shop {
     this.isPremium = false,
     this.featured = false,
     this.verificationStatus = 'pending',
+    this.certificationDocumentUrl,
     this.stockQuantity,
     this.paymentMethod,
     this.ratingAvg = 0,
@@ -67,6 +69,7 @@ class Shop {
       isPremium: map['is_premium'] as bool? ?? false,
       featured: map['featured'] as bool? ?? false,
       verificationStatus: map['verification_status'] as String? ?? 'pending',
+      certificationDocumentUrl: map['certification_document_url'] as String?,
       stockQuantity: (map['stock_quantity'] as num?)?.toInt(),
       paymentMethod: map['payment_method'] as String?,
       ratingAvg: (map['rating_avg'] as num?)?.toDouble() ?? 0,

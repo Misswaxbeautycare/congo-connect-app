@@ -340,6 +340,31 @@ class _PendingShopsTab extends StatelessWidget {
                       shop.acceptsAppointments ? 'Accepte les rendez-vous' : "N'accepte pas les rendez-vous",
                       style: const TextStyle(fontSize: 12.5, fontStyle: FontStyle.italic),
                     ),
+                    if (shop.certificationDocumentUrl != null) ...[
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (_) => Dialog(
+                            child: InteractiveViewer(
+                              child: Image.network(shop.certificationDocumentUrl!),
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(shop.certificationDocumentUrl!,
+                                  width: 44, height: 44, fit: BoxFit.cover),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('Document de vérification (toucher pour agrandir)',
+                                style: TextStyle(fontSize: 12.5, color: Color(0xFF0057B8))),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 10),
                     Row(
                       children: [
