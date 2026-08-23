@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/shop.dart';
 import '../widgets/location_row.dart';
+import '../models/product.dart';
+import '../services/product_service.dart';
 import 'appointment_page.dart';
 
 class ShopProfilePage extends StatelessWidget {
@@ -160,6 +162,8 @@ class ShopProfilePage extends StatelessWidget {
                         ),
                       ),
                     ],
+                    const SizedBox(height: 20),
+                    _ProductCatalogSection(shopId: shop.id),
                   ],
                 ),
               ),
@@ -167,6 +171,79 @@ class ShopProfilePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProductCatalogSection extends StatelessWidget {
+  final String shopId;
+
+  const _ProductCatalogSection({required this.shopId});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Product>>(
+      future: ProductService.getProductsForShop(shopId),
+      builder: (context, snapshot) {
+        final products = snapshot.data ?? [];
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(height: 40, child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
+        }
+        if (products.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Catalogue', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.8,
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, i) {
+                final p = products[i];
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade200),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: p.photoUrl != null
+                            ? CachedNetworkImage(imageUrl: p.photoUrl!, fit: BoxFit.cover, width: double.infinity)
+                            : Container(color: Colors.grey.shade100),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            if (p.price != null)
+                              Text('${p.price!.toStringAsFixed(0)} €',
+                                  style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

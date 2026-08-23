@@ -7,6 +7,7 @@ import '../services/community_listing_service.dart';
 import '../services/my_listings_store.dart';
 import 'shop_profile_page.dart';
 import 'edit_shop_page.dart';
+import 'manage_catalog_page.dart';
 import 'listing_detail_page.dart';
 import 'login_page.dart';
 
@@ -134,6 +135,15 @@ class _MyListingsPageState extends State<MyListingsPage> {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              IconButton(
+                                icon: const Icon(Icons.storefront_outlined, color: Color(0xFF2E8B57)),
+                                tooltip: 'Catalogue',
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => ManageCatalogPage(shop: shop)),
+                                  );
+                                },
+                              ),
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined, color: Color(0xFF0057B8)),
                                 onPressed: () async {
