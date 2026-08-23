@@ -89,7 +89,11 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
               final a = appointments[i];
               final status = a['status'] as String? ?? 'pending';
               final shopName = (a['shops'] as Map?)?['name'] as String? ?? '';
-              final mode = a['appointment_mode'] == 'telephonique' ? 'Téléphonique' : 'Sur place';
+              final mode = switch (a['appointment_mode']) {
+                'telephonique' => 'Téléphonique',
+                'en_ligne' => 'En ligne (Meet/Zoom)',
+                _ => 'Sur place',
+              };
               return Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(

@@ -78,7 +78,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
         'status': 'pending',
       });
       if (widget.shop.ownerId != null) {
-        final modeLabel = _appointmentMode == 'telephonique' ? 'téléphonique' : 'sur place';
+        final modeLabel = switch (_appointmentMode) {
+          'telephonique' => 'téléphonique',
+          'en_ligne' => 'en ligne (Meet/Zoom)',
+          _ => 'sur place',
+        };
         await NotificationService.notifyUser(
           userId: widget.shop.ownerId!,
           title: 'Nouvelle demande de rendez-vous 📅',
@@ -139,22 +143,24 @@ class _AppointmentPageState extends State<AppointmentPage> {
           const SizedBox(height: 16),
           const Text('Type de rendez-vous', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              Expanded(
-                child: ChoiceChip(
-                  label: const Text('Sur place'),
-                  selected: _appointmentMode == 'sur_place',
-                  onSelected: (_) => setState(() => _appointmentMode = 'sur_place'),
-                ),
+              ChoiceChip(
+                label: const Text('Sur place'),
+                selected: _appointmentMode == 'sur_place',
+                onSelected: (_) => setState(() => _appointmentMode = 'sur_place'),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ChoiceChip(
-                  label: const Text('Téléphonique'),
-                  selected: _appointmentMode == 'telephonique',
-                  onSelected: (_) => setState(() => _appointmentMode = 'telephonique'),
-                ),
+              ChoiceChip(
+                label: const Text('Téléphonique'),
+                selected: _appointmentMode == 'telephonique',
+                onSelected: (_) => setState(() => _appointmentMode = 'telephonique'),
+              ),
+              ChoiceChip(
+                label: const Text('En ligne (Meet/Zoom)'),
+                selected: _appointmentMode == 'en_ligne',
+                onSelected: (_) => setState(() => _appointmentMode = 'en_ligne'),
               ),
             ],
           ),
