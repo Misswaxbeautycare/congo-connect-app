@@ -106,6 +106,12 @@ class ShopService {
     await supabase.from('shops').update({'is_premium': isPremium}).eq('id', shopId);
   }
 
+  static Future<List<Shop>> getShopsByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final response = await supabase.from('shops').select().inFilter('id', ids);
+    return (response as List).map((item) => Shop.fromMap(item as Map<String, dynamic>)).toList();
+  }
+
   static Future<void> createShop({
     required String name,
     required String category,

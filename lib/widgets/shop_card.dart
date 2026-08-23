@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/shop.dart';
+import 'favorite_heart.dart';
 
 class ShopCard extends StatelessWidget {
   final Shop shop;
@@ -33,15 +34,24 @@ class ShopCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: shop.coverUrl != null && shop.coverUrl!.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: shop.coverUrl!,
-                      height: 90,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorWidget: (context, url, error) => _placeholder(),
-                    )
-                  : _placeholder(),
+              child: Stack(
+                children: [
+                  shop.coverUrl != null && shop.coverUrl!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: shop.coverUrl!,
+                          height: 90,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => _placeholder(),
+                        )
+                      : _placeholder(),
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: FavoriteHeart(itemType: 'shop', itemId: shop.id, size: 16),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8),

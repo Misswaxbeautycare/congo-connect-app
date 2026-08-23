@@ -24,6 +24,7 @@ import 'notifications_page.dart';
 import '../services/notification_service.dart';
 import 'my_appointments_page.dart';
 import 'properties_page.dart';
+import 'favorites_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -147,6 +148,10 @@ class _HomePageState extends State<HomePage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const MyAppointmentsPage()),
                 );
+              } else if (value == 'favorites') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FavoritesPage()),
+                );
               } else if (value == 'admin') {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminPage()),
@@ -184,6 +189,13 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.event_note_outlined),
                   title: Text('Mes rendez-vous'),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'favorites',
+                child: ListTile(
+                  leading: Icon(Icons.favorite_border),
+                  title: Text('Mes favoris'),
                 ),
               ),
               if (AdminConfig.isAdmin(supabase.auth.currentUser?.email))

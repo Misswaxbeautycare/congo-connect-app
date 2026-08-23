@@ -4,6 +4,7 @@ import '../models/property.dart';
 import '../services/property_service.dart';
 import 'create_property_page.dart';
 import 'property_detail_page.dart';
+import '../widgets/favorite_heart.dart';
 
 class PropertiesPage extends StatefulWidget {
   const PropertiesPage({super.key});
@@ -104,6 +105,11 @@ class _PropertiesPageState extends State<PropertiesPage> {
                                 child: const Text('Indisponible',
                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               ),
+                            Positioned(
+                              top: 6,
+                              right: 6,
+                              child: FavoriteHeart(itemType: 'property', itemId: p.id, size: 16),
+                            ),
                           ],
                         ),
                       ),

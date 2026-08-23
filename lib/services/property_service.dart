@@ -77,4 +77,10 @@ class PropertyService {
   static Future<void> setPropertyStatus(String id, String status) async {
     await supabase.from('properties').update({'status': status}).eq('id', id);
   }
+
+  static Future<List<Property>> getPropertiesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final response = await supabase.from('properties').select().inFilter('id', ids);
+    return (response as List).map((item) => Property.fromMap(item as Map<String, dynamic>)).toList();
+  }
 }
