@@ -5,6 +5,7 @@ import '../models/shop.dart';
 import '../widgets/location_row.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
+import '../widgets/reviews_section.dart';
 import 'appointment_page.dart';
 
 class ShopProfilePage extends StatelessWidget {
@@ -164,6 +165,8 @@ class ShopProfilePage extends StatelessWidget {
                     ],
                     const SizedBox(height: 20),
                     _ProductCatalogSection(shopId: shop.id),
+                    const SizedBox(height: 24),
+                    ReviewsSection(shopId: shop.id),
                   ],
                 ),
               ),
