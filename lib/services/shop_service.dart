@@ -102,6 +102,10 @@ class ShopService {
     }).eq('id', shopId);
   }
 
+  static Future<void> setShopPremium(String shopId, bool isPremium) async {
+    await supabase.from('shops').update({'is_premium': isPremium}).eq('id', shopId);
+  }
+
   static Future<void> createShop({
     required String name,
     required String category,

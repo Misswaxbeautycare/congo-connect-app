@@ -357,9 +357,25 @@ class _AllShopsTab extends StatelessWidget {
                   style: const TextStyle(fontSize: 12.5),
                 ),
                 isThreeLine: true,
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: () => _confirmDelete(context, shop),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        shop.isPremium ? Icons.star : Icons.star_border,
+                        color: shop.isPremium ? const Color(0xFFF39C12) : Colors.grey,
+                      ),
+                      tooltip: shop.isPremium ? 'Retirer Premium' : 'Passer Premium',
+                      onPressed: () async {
+                        await ShopService.setShopPremium(shop.id, !shop.isPremium);
+                        onChanged();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () => _confirmDelete(context, shop),
+                    ),
+                  ],
                 ),
               ),
             );
