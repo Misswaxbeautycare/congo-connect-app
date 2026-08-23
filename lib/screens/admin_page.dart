@@ -7,6 +7,8 @@ import '../services/shop_service.dart';
 import '../services/advertisement_service.dart';
 import '../services/notification_service.dart';
 import '../services/community_listing_service.dart';
+import '../models/property.dart';
+import '../services/property_service.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -21,12 +23,13 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   late Future<List<AdRequest>> _pendingAdsFuture;
   late Future<List<Shop>> _allShopsFuture;
   late Future<List<CommunityListing>> _allListingsFuture;
+  late Future<List<Property>> _pendingPropertiesFuture;
   late Future<_Stats> _statsFuture;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _load();
   }
 
@@ -35,6 +38,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     _pendingAdsFuture = AdvertisementService.getPendingAdRequests();
     _allShopsFuture = ShopService.getAllShopsForAdmin();
     _allListingsFuture = CommunityListingService.getAllListingsForAdmin();
+    _pendingPropertiesFuture = PropertyService.getPendingProperties();
     _statsFuture = _loadStats();
   }
 
@@ -81,6 +85,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             Tab(text: 'Boutiques'),
             Tab(text: 'Dons/Troc'),
             Tab(text: 'Publicités'),
+            Tab(text: 'Immobilier'),
           ],
         ),
       ),
@@ -92,8 +97,91 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
           _AllShopsTab(future: _allShopsFuture, onChanged: _refresh),
           _AllListingsTab(future: _allListingsFuture, onChanged: _refresh),
           _PendingAdsTab(future: _pendingAdsFuture, onChanged: _refresh),
+          _PendingPropertiesTab(future: _pendingPropertiesFuture, onChanged: _refresh),
         ],
       ),
+    );
+  }
+}
+
+class _PendingPropertiesTab extends StatelessWidget {
+  final Future<List<Property>> future;
+  final VoidCallback onChanged;
+
+  const _PendingPropertiesTab({required this.future, required this.onChanged});
+
+  Future<void> _act(BuildContext context, Property property, String status) async {
+    await PropertyService.setPropertyStatus(property.id, status);
+    onChanged();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(status == 'approved' ? 'Bien validé' : 'Bien rejeté')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Property>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final properties = snapshot.data ?? [];
+        if (properties.isEmpty) {
+          return const Center(child: Text('Aucun bien en attente.', style: TextStyle(color: Colors.black54)));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: properties.length,
+          itemBuilder: (context, i) {
+            final p = properties[i];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(height: 4),
+                    if (p.propertyType != null)
+                      Text(p.propertyType!, style: const TextStyle(color: Colors.black54, fontSize: 12.5)),
+                    if (p.price != null)
+                      Text('Prix : ${p.price!.toStringAsFixed(0)} € (${p.priceUnit})', style: const TextStyle(fontSize: 12.5)),
+                    if (p.rooms != null)
+                      Text('Chambres : ${p.rooms}', style: const TextStyle(fontSize: 12.5)),
+                    if (p.address != null) Text('Adresse : ${p.address}', style: const TextStyle(fontSize: 12.5)),
+                    if (p.phone != null) Text('Tél : ${p.phone}', style: const TextStyle(fontSize: 12.5)),
+                    Text('${p.photos.length} photo(s)', style: const TextStyle(fontSize: 12.5)),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => _act(context, p, 'rejected'),
+                            style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                            child: const Text('Rejeter'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => _act(context, p, 'approved'),
+                            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E8B57)),
+                            child: const Text('Valider'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

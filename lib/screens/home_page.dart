@@ -23,6 +23,7 @@ import '../config/admin_config.dart';
 import 'notifications_page.dart';
 import '../services/notification_service.dart';
 import 'my_appointments_page.dart';
+import 'properties_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -79,9 +80,15 @@ class _HomePageState extends State<HomePage> {
                       title: Text(module.label),
                       onTap: () {
                         Navigator.of(context).pop();
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => CategoryPage(moduleKey: module.key)),
-                        );
+                        if (module.key == 'immobilier') {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const PropertiesPage()),
+                          );
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => CategoryPage(moduleKey: module.key)),
+                          );
+                        }
                       },
                     );
                   },
