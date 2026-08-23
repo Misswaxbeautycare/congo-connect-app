@@ -134,6 +134,39 @@ class ShopService {
     });
   }
 
+  /// Met à jour une boutique existante. Repasse en attente de validation
+  /// à chaque modification, pour que l'admin puisse revérifier le contenu.
+  static Future<void> updateShop({
+    required String shopId,
+    required String name,
+    required String category,
+    String? subcategory,
+    String? bio,
+    String? phone,
+    String? email,
+    String? address,
+    bool acceptsAppointments = false,
+    String? coverUrl,
+    int? stockQuantity,
+    String? paymentMethod,
+  }) async {
+    await supabase.from('shops').update({
+      'name': name,
+      'category': category,
+      'subcategory': subcategory,
+      'bio': bio,
+      'phone': phone,
+      'email': email,
+      'address': address,
+      'accepts_appointments': acceptsAppointments,
+      'cover_url': coverUrl,
+      'stock_quantity': stockQuantity,
+      'payment_method': paymentMethod,
+      'status': 'pending',
+      'verification_status': 'pending',
+    }).eq('id', shopId);
+  }
+
   static Future<List<Shop>> getAllShopsForAdmin() async {
     final response = await supabase
         .from('shops')

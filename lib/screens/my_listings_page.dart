@@ -6,6 +6,7 @@ import '../services/shop_service.dart';
 import '../services/community_listing_service.dart';
 import '../services/my_listings_store.dart';
 import 'shop_profile_page.dart';
+import 'edit_shop_page.dart';
 import 'listing_detail_page.dart';
 import 'login_page.dart';
 
@@ -130,9 +131,23 @@ class _MyListingsPageState extends State<MyListingsPage> {
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => ShopProfilePage(shop: shop)),
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.red),
-                            onPressed: () => _deleteShop(shop),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, color: Color(0xFF0057B8)),
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => EditShopPage(shop: shop)),
+                                  );
+                                  _refresh();
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                onPressed: () => _deleteShop(shop),
+                              ),
+                            ],
                           ),
                         ),
                       );
