@@ -59,8 +59,25 @@ class _CategoryPageState extends State<CategoryPage> {
             if (snapshot.hasError) {
               return ListView(
                 children: [
-                  const SizedBox(height: 120),
-                  Center(child: Text('Erreur : ${snapshot.error}')),
+                  const SizedBox(height: 100),
+                  const Icon(Icons.wifi_off_outlined, size: 48, color: Colors.black38),
+                  const SizedBox(height: 16),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      'Impossible de charger cette catégorie. Vérifie ta connexion internet.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: OutlinedButton.icon(
+                      onPressed: _refresh,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Réessayer'),
+                    ),
+                  ),
                 ],
               );
             }

@@ -21,7 +21,8 @@ class ShopService {
         .select()
         .eq('status', 'approved')
         .eq('category', category)
-        .order('rating_avg', ascending: false);
+        .order('rating_avg', ascending: false)
+        .timeout(const Duration(seconds: 15));
 
     return (response as List)
         .map((item) => Shop.fromMap(item as Map<String, dynamic>))

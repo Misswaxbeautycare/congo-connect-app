@@ -7,7 +7,8 @@ class PropertyService {
         .from('properties')
         .select()
         .eq('status', 'approved')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .timeout(const Duration(seconds: 15));
     return (response as List)
         .map((item) => Property.fromMap(item as Map<String, dynamic>))
         .toList();
